@@ -1,278 +1,158 @@
-/* --- phone fit fixes --- */
-* { box-sizing: border-box; }
-body { overflow-x: hidden; }
-#sessionCard, .card { overflow-x: hidden; }
-
-/* inputs must be allowed to shrink inside grids */
-input, button, select { max-width: 100%; }
-.setRowGrid > * { min-width: 0; }
-
-/* make the set rows always fit on iPhone width */
-.setRowGrid {
-  display: grid;
-  grid-template-columns: 32px minmax(0, 1fr) minmax(0, 1fr) 40px;
-  gap: 8px;
-  align-items: center;
-}
-
-/* keep inputs compact */
-.setRowGrid input {
-  width: 100%;
-  min-width: 0;
-  height: 34px;
-  padding: 6px 10px;
-  border-radius: 12px;
-  font-size: 14px;
-}<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#0b0b0d" />
-  <title>2 km 8:10 – Treadmill Routine</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>2 km 8:10 – Treadmill Routine</title>
 
-  <style>
-    :root{
-      --bg:#0b0b0d;
-      --card:#121216;
-      --card2:#101015;
-      --text:#f3f4f6;
-      --muted:#9aa0a6;
-      --line:#25262b;
-      --accent:#66c6ff;
-      --btn:#1a1b21;
-      --btn2:#15161b;
-      --radius:18px;
-      --pad:14px;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-      background:var(--bg);
-      color:var(--text);
-      padding:16px 14px 24px;
-    }
-    h1{
-      margin:6px 0 2px;
-      font-size:22px;
-      letter-spacing:.2px;
-    }
-    .sub{
-      margin:0 0 14px;
-      color:var(--muted);
-      font-size:13px;
-      line-height:1.4;
-    }
-    .row{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
-      margin:10px 0 12px;
-    }
-    select, input, button{
-      background:var(--btn);
-      color:var(--text);
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:10px 12px;
-      font-size:15px;
-      outline:none;
-    }
-    button{
-      cursor:pointer;
-      background:var(--btn2);
-    }
-    button.primary{
-      background:var(--accent);
-      border-color:transparent;
-      color:#081017;
-      font-weight:800;
-    }
-    .chip{
-      padding:10px 12px;
-      border-radius:14px;
-      border:1px solid var(--line);
-      background:var(--btn2);
-      color:var(--muted);
-      font-size:13px;
-    }
-    .card{
-      background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,0));
-      border:1px solid var(--line);
-      border-radius:var(--radius);
-      padding:var(--pad);
-      margin:12px 0;
-    }
-    .hr{
-      height:1px;
-      background:var(--line);
-      margin:12px 0;
-    }
-    .muted{ color:var(--muted); }
-    ul{ margin:8px 0 0 18px; padding:0; }
-    li{ margin:5px 0; }
-    .title{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:10px;
-    }
-    .title strong{ font-size:17px; }
-    .big{
-      font-size:36px;
-      font-weight:900;
-      letter-spacing:.5px;
-      font-variant-numeric:tabular-nums;
-    }
-    .btnCol{
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-      min-width:150px;
-    }
+<style>
+:root{
+  --bg:#0b0b0f;
+  --card:#15151c;
+  --muted:#9aa0a6;
+  --accent:#6fd3ff;
+}
 
-    /* ---------- Compact mobile tweaks ---------- */
-    @media (max-width: 480px){
-      body{ padding:14px 12px 22px; }
-      .card{ padding:12px; border-radius:16px; }
-      h1{ font-size:20px; }
-      .big{ font-size:34px; }
+html,body{
+  margin:0;
+  padding:0;
+  background:var(--bg);
+  color:#fff;
+  font-family:-apple-system,BlinkMacSystemFont,system-ui;
+  overflow-x:hidden;
+}
 
-      details summary{
-        cursor:pointer;
-        font-weight:800;
-        margin:6px 0;
-      }
-      details ul{ margin:6px 0 0 18px; }
+*{box-sizing:border-box;}
 
-      .exCard{ padding:10px !important; border-radius:14px !important; }
-      .exHeader{ margin-bottom:6px !important; }
+.app{
+  max-width:420px;
+  margin:0 auto;
+  padding:14px;
+}
 
-      .setHeaderGrid, .setRowGrid{
-        display:grid;
-        grid-template-columns: 34px 1fr 1fr 44px; /* Set | kg | reps | done */
-        gap:8px;
-        align-items:center;
-      }
-      .setRowGrid{ margin-top:6px !important; }
+h1{
+  font-size:18px;
+  margin:4px 0 12px;
+}
 
-      input{
-        height:34px;
-        padding:6px 10px;
-        font-size:14px;
-        border-radius:12px;
-      }
-      input[type="checkbox"]{
-        width:18px;
-        height:18px;
-      }
-    }
-  </style>
+.card{
+  background:var(--card);
+  border-radius:16px;
+  padding:14px;
+  margin-bottom:14px;
+  overflow-x:hidden;
+}
+
+.muted{color:var(--muted);font-size:13px;}
+
+button{
+  border:0;
+  border-radius:14px;
+  padding:10px 14px;
+  font-size:15px;
+  background:#2a2a33;
+  color:#fff;
+}
+
+button.primary{
+  background:var(--accent);
+  color:#000;
+  font-weight:600;
+}
+
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+
+select,input{
+  background:#0f0f14;
+  color:#fff;
+  border:1px solid #2a2a33;
+  border-radius:12px;
+  padding:8px 10px;
+  font-size:14px;
+}
+
+input{width:100%;}
+
+/* ===== SET ROWS (NO HORIZONTAL SCROLL) ===== */
+.setRowGrid,
+.setRowGridHeader{
+  display:grid;
+  grid-template-columns:34px minmax(0,1fr) minmax(0,1fr) 44px;
+  gap:8px;
+  align-items:center;
+  width:100%;
+}
+
+.setRowGrid *{min-width:0;}
+
+.setRowGrid input{
+  height:34px;
+  padding:6px 8px;
+  font-size:14px;
+  border-radius:12px;
+}
+
+.checkbox{
+  width:22px;
+  height:22px;
+}
+
+.exerciseNav{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:8px;
+}
+
+.timerBig{
+  font-size:36px;
+  font-weight:700;
+  letter-spacing:1px;
+}
+
+/* ===== STICKY TIMER BAR ===== */
+.stickyTimer{
+  position:sticky;
+  bottom:10px;
+  background:var(--card);
+  padding:12px;
+  border-radius:16px;
+  margin-top:14px;
+}
+</style>
 </head>
 
 <body>
-  <h1>2 km 8:10 – Treadmill Routine</h1>
-  <p class="sub">Incline 1.0% • Race pace 14.7 km/h • Tick warm-up / main / mobility • Saves on this device</p>
+<div class="app">
 
+<h1>2 km 8:10 – Treadmill Routine</h1>
+
+<div class="row">
+  <select id="daySelect"></select>
+  <button onclick="resetDay()">Reset day</button>
+</div>
+
+<button class="primary" onclick="resetWeek()">Reset week</button>
+
+<div class="card" id="sessionCard"></div>
+
+<div class="card">
+  <h3>Interval Timer</h3>
+  <div class="timerBig" id="intervalDisplay">00:00</div>
   <div class="row">
-    <span class="chip">Day</span>
-    <select id="daySelect"></select>
-    <button id="resetDayBtn" type="button">Reset day</button>
-    <button id="resetWeekBtn" class="primary" type="button">Reset week</button>
+    <button class="primary" onclick="startInterval()">Start</button>
+    <button onclick="pauseInterval()">Pause</button>
+    <button onclick="stopInterval()">Stop</button>
   </div>
-
-  <div id="sessionCard" class="card"></div>
-
-  <!-- Interval Timer (used on run days; app auto-fills Work/Rest/Rounds) -->
-  <div class="card" id="intervalCard">
-    <div class="title">
-      <div>
-        <strong>Interval Timer</strong>
-        <div class="muted">Use for intervals & strides</div>
-      </div>
-      <div class="muted" id="intervalStatus">Ready</div>
-    </div>
-
-    <div class="hr"></div>
-
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
-      <div class="big" id="intervalClock">00:00</div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <button class="primary" id="iStart" type="button">Start</button>
-        <button id="iPause" type="button">Pause</button>
-        <button id="iStop" type="button">Stop</button>
-      </div>
-    </div>
-
-    <div class="hr"></div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div>
-        <div class="muted">Work (sec)</div>
-        <input id="workSec" type="number" min="5" value="60" />
-      </div>
-      <div>
-        <div class="muted">Rest (sec)</div>
-        <input id="restSec" type="number" min="5" value="60" />
-      </div>
-      <div>
-        <div class="muted">Rounds</div>
-        <input id="rounds" type="number" min="1" value="6" />
-      </div>
-      <div>
-        <div class="muted">Auto switch</div>
-        <select id="autoSwitch">
-          <option value="on" selected>On</option>
-          <option value="off">Off</option>
-        </select>
-      </div>
-    </div>
+  <div class="row">
+    <input id="workSec" type="number" placeholder="Work (sec)">
+    <input id="restSec" type="number" placeholder="Rest (sec)">
+    <input id="rounds" type="number" placeholder="Rounds">
   </div>
+</div>
 
-  <p class="sub" style="margin-top:10px;">
-    Install: Safari → Share → Add to Home Screen • Offline works after first load.
-  </p>
+</div>
 
-  <script src="app.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
-
-/* ===== iPhone: stop horizontal scroll + make kg/reps fit ===== */
-html, body { width: 100%; overflow-x: hidden; }
-* { box-sizing: border-box; }
-
-/* make cards never allow sideways overflow */
-.card, #sessionCard { overflow-x: hidden; }
-
-/* critical: allow grid children to shrink */
-.setRowGrid, .setRowGrid * { min-width: 0; }
-
-/* set rows: always fit on screen */
-.setRowGrid{
-  display: grid;
-  grid-template-columns: 34px minmax(0,1fr) minmax(0,1fr) 44px; /* Set | kg | reps | Done */
-  gap: 8px;
-  align-items: center;
-  width: 100%;
-}
-
-/* compact inputs that can shrink */
-.setRowGrid input{
-  width: 100%;
-  min-width: 0;
-  height: 34px;
-  padding: 6px 10px;
-  font-size: 14px;
-  border-radius: 12px;
-}
-
-/* keep header aligned and not forcing width */
-.setRowGridHeader{
-  display: grid;
-  grid-template-columns: 34px minmax(0,1fr) minmax(0,1fr) 44px;
-  gap: 8px;
-  align-items: center;
-  width: 100%;
-}
