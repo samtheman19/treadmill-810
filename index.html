@@ -11,7 +11,7 @@
   --card:#15151c;
   --muted:#9aa0a6;
   --accent:#6fd3ff;
-  --line:#2a2a35;
+  --border:#22232b;
 }
 
 *{box-sizing:border-box}
@@ -19,143 +19,89 @@ html,body{
   margin:0;
   background:var(--bg);
   color:#fff;
-  font-family:-apple-system,BlinkMacSystemFont,system-ui,Roboto;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
   overflow-x:hidden;
 }
-.app{max-width:420px;margin:0 auto;padding:14px}
-h1{font-size:20px;margin:8px 0 10px}
-h2{font-size:18px;margin:6px 0}
-h3{font-size:16px;margin:10px 0 4px}
-.small{color:var(--muted);font-size:13px}
-hr{border:none;border-top:1px solid var(--line);margin:12px 0}
+
+.app{
+  max-width:420px;
+  margin:0 auto;
+  padding:14px;
+}
+
+h1{font-size:20px;margin:8px 0}
+h2{font-size:17px;margin:0 0 6px}
+small{color:var(--muted)}
+
+button{
+  background:#22232b;
+  color:#fff;
+  border:none;
+  padding:10px 14px;
+  border-radius:14px;
+  font-size:15px;
+}
+
+.primary{background:var(--accent);color:#000;font-weight:600}
 
 .card{
   background:var(--card);
-  border-radius:16px;
+  border-radius:18px;
   padding:14px;
-  margin:10px 0;
+  margin:12px 0;
   overflow-x:hidden;
 }
 
-.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.row > *{flex:1}
-.row button{flex:0 0 auto}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 
-button{
-  background:#23232c;
-  color:#fff;
-  border:none;
-  border-radius:14px;
-  padding:10px 14px;
-  font-size:14px;
-}
-button.primary{background:var(--accent);color:#000;font-weight:800}
+.spread{display:flex;justify-content:space-between;align-items:center}
 
-select,input{
-  background:#1e1e26;
-  color:#fff;
-  border:none;
+label{font-size:13px;color:var(--muted)}
+
+input{
+  width:100%;
+  background:#1b1c24;
+  border:1px solid var(--border);
   border-radius:12px;
-  padding:8px 10px;
+  padding:8px;
+  color:#fff;
   font-size:14px;
-  width:100%;
-}
-input[type="number"]{appearance:textfield}
-input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
-
-.timerBig{
-  font-size:42px;font-weight:900;letter-spacing:1px;line-height:1;margin:8px 0 10px
-}
-.timerMid{
-  font-size:34px;font-weight:900;letter-spacing:1px;line-height:1;margin:8px 0 10px
 }
 
-/* ✅ Checkbox line: stays normal, never stacks vertically */
-.checkLine{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  width:100%;
-  margin-top:10px;
-}
-.checkLine input{width:22px;height:22px;flex:0 0 auto}
-.checkLine span{
-  flex:1 1 auto;
-  white-space:nowrap;         /* one line */
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
+.checkbox{width:22px;height:22px}
 
-/* ✅ Strength grid fits iPhone width */
-.setGridHeader,
-.setGrid{
+/* ===== SET TABLE (NO HORIZONTAL SCROLL) ===== */
+.setHeader,.setRow{
   display:grid;
-  grid-template-columns: 34px minmax(0,1fr) 44px minmax(0,1fr) 44px 34px;
-  /*            Set       kg input      LW      reps input     LW     done */
-  gap:8px;
+  grid-template-columns:30px minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) 34px;
+  gap:6px;
   align-items:center;
   width:100%;
 }
-.setGridHeader{margin-top:10px}
-.setGrid{margin-top:8px}
-.setGrid input{
-  height:34px;
-  font-size:14px;
-  min-width:0;
-}
-.lwCell{
-  height:34px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:12px;
-  background:#1e1e26;
-  color:var(--muted);
+
+.setHeader{
   font-size:12px;
+  color:var(--muted);
+  margin-bottom:6px;
+}
+
+.setRow input{height:34px;padding:6px;font-size:13px}
+
+/* ===== TIMERS ===== */
+.timer{
+  font-size:36px;
   font-weight:700;
-}
-.doneBox{width:22px;height:22px}
-
-/* Cards for exercises */
-.exerciseTitleRow{
-  display:flex;justify-content:space-between;gap:10px;align-items:flex-start
-}
-.badge{
-  background:#1e1e26;
-  color:var(--muted);
-  border-radius:999px;
-  padding:6px 10px;
-  font-size:12px;
-  white-space:nowrap;
+  text-align:center;
+  margin:8px 0;
 }
 
-/* Mobility list */
-.mobItem{
+/* ===== MOBILITY ===== */
+.mobRow{
   display:flex;
-  gap:10px;
+  justify-content:space-between;
   align-items:center;
-  padding:10px 0;
-  border-top:1px solid var(--line);
-}
-.mobItem:first-of-type{border-top:none}
-.mobItem input[type="checkbox"]{width:22px;height:22px;flex:0 0 auto}
-.mobItem .name{flex:1 1 auto}
-.mobItem .dur{width:86px}
-.mobItem button{padding:8px 10px;border-radius:12px}
-
-.mobTimerRow{
-  display:flex;
   gap:10px;
-  align-items:center;
-  flex-wrap:wrap;
-  margin-top:10px;
-}
-.mobTimerRow button{flex:0 0 auto}
-.mobNow{
-  background:#1e1e26;
-  border-radius:12px;
-  padding:10px;
-  width:100%;
+  margin:6px 0;
 }
 </style>
 </head>
@@ -165,738 +111,158 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
 
 <h1>2 km 8:10 – Treadmill Routine</h1>
 
-<div class="row">
-  <select id="daySelect"></select>
-  <button onclick="resetDay()">Reset day</button>
-</div>
-
-<button class="primary" onclick="resetWeek()">Reset week</button>
-
-<!-- WORKOUT TIMER -->
-<div class="card" id="workoutCard">
-  <div class="row" style="align-items:flex-start">
-    <div style="flex:1">
-      <h2 style="margin:0">Workout</h2>
-      <div class="small">Date: <span id="dateTxt"></span> • Streak: <span id="streakTxt">0</span></div>
-
-      <div style="margin-top:10px">
-        <div class="small" style="margin-bottom:4px">Workout time</div>
-        <div class="timerBig" id="workoutTime">00:00:00</div>
-        <div class="small" id="workoutState">Paused</div>
-      </div>
-
-      <div class="row" style="margin-top:10px">
-        <div>
-          <div class="small">Week</div>
-          <input id="weekNum" type="number" min="1" value="1" />
-        </div>
-      </div>
+<div class="card">
+  <div class="spread">
+    <div>
+      <strong>Workout</strong><br>
+      <small id="today"></small>
     </div>
-
-    <div style="flex:0 0 auto;display:flex;flex-direction:column;gap:10px;margin-top:22px">
-      <button class="primary" onclick="startWorkout()">Start</button>
-      <button onclick="pauseWorkout()">Pause</button>
-      <button onclick="endWorkout()">End (save)</button>
-    </div>
+    <button class="primary" onclick="startWorkout()">Start</button>
   </div>
 
-  <div class="checkLine">
-    <input id="autoRest" type="checkbox" checked />
-    <span class="small">Auto-start rest when set done</span>
+  <div class="timer" id="workoutTime">00:00:00</div>
+
+  <div class="row">
+    <button onclick="pauseWorkout()">Pause</button>
+    <button onclick="endWorkout()">End (save)</button>
+  </div>
+
+  <label style="display:flex;align-items:center;gap:8px;margin-top:8px">
+    <input type="checkbox" class="checkbox" checked />
+    Auto-start rest when set done
+  </label>
+</div>
+
+<!-- ================= STRENGTH ================= -->
+<div class="card">
+<h2>Mon – Strength A</h2>
+
+<h3>Trap Bar Deadlift</h3>
+<small>4 sets • target reps 3 • fast, no grind</small>
+
+<div class="setHeader">
+  <div>#</div><div>kg</div><div>LW</div><div>reps</div><div>✓</div>
+</div>
+
+<div id="deadlift"></div>
+
+<div class="card">
+  <label>Rest timer</label>
+  <div class="timer" id="restTime">01:30</div>
+  <div class="row">
+    <button onclick="setRest(60)">60s</button>
+    <button onclick="setRest(90)">90s</button>
+    <button onclick="setRest(120)">120s</button>
+    <button class="primary" onclick="startRest()">Start</button>
   </div>
 </div>
 
-<!-- CONTENT -->
-<div id="content"></div>
+<h3>Bulgarian Split Squat</h3>
+<small>3 sets • target reps 5 • each leg</small>
+
+<div class="setHeader">
+  <div>#</div><div>kg</div><div>LW</div><div>reps</div><div>✓</div>
+</div>
+
+<div id="bulgarian"></div>
+
+<h3>Box Jumps</h3>
+<small>3 sets • target reps 3</small>
+
+<div class="setHeader">
+  <div>#</div><div>kg</div><div>LW</div><div>reps</div><div>✓</div>
+</div>
+
+<div id="boxjumps"></div>
+
+</div>
+
+<!-- ================= MOBILITY ================= -->
+<div class="card">
+<h2>Mobility</h2>
+
+<div class="mobRow">
+  <span>Couch stretch (1 min / side)</span>
+  <button onclick="startMobility(60)">Start</button>
+</div>
+
+<div class="mobRow">
+  <span>Calf stretch (1 min / side)</span>
+  <button onclick="startMobility(60)">Start</button>
+</div>
+
+<div class="mobRow">
+  <span>Glute stretch (1 min / side)</span>
+  <button onclick="startMobility(60)">Start</button>
+</div>
+
+<div class="timer" id="mobTime">00:00</div>
+</div>
 
 </div>
 
 <script>
-/* ========= DATA ========= */
-const STORAGE_KEY = "treadmill810_v3";
+const todayEl=document.getElementById("today");
+todayEl.textContent=new Date().toDateString();
 
-const days = [
-  { key:"mon", name:"Mon – Strength A", type:"strength", strengthKey:"A" },
-  { key:"tue", name:"Tue – Intervals (Run)", type:"runIntervals" },
-  { key:"wed", name:"Wed – Mobility / Rest", type:"mobilityOnly" },
-  { key:"thu", name:"Thu – Strength B", type:"strength", strengthKey:"B" },
-  { key:"fri", name:"Fri – Tempo / 2k Pace (Run)", type:"run" },
-  { key:"sat", name:"Sat – Easy Run (Optional)", type:"runEasy" },
-  { key:"sun", name:"Sun – Rest", type:"rest" },
-];
-
-const strengthPlans = {
-  A: {
-    title: "Strength A",
-    exercises: [
-      { id:"trap", name:"Trap Bar Deadlift", sets:4, targetReps:3, note:"Fast reps, no grind" },
-      { id:"bss",  name:"Bulgarian Split Squat", sets:3, targetReps:5, note:"Each leg" },
-      { id:"box",  name:"Box Jumps", sets:3, targetReps:3, note:"Reset each rep" },
-      { id:"calf", name:"Standing Calf Raises", sets:3, targetReps:10, note:"Slow down" },
-    ]
-  },
-  B: {
-    title: "Strength B",
-    exercises: [
-      { id:"squat", name:"Front Squat (or Goblet)", sets:4, targetReps:5, note:"Controlled, crisp reps" },
-      { id:"rdl",   name:"Romanian Deadlift", sets:3, targetReps:6, note:"Hinge, hamstrings" },
-      { id:"step",  name:"Step-ups", sets:3, targetReps:6, note:"Each leg" },
-      { id:"calf2", name:"Seated Calf Raises", sets:3, targetReps:12, note:"Full range" },
-    ]
-  }
-};
-
-const runPlans = {
-  tue: {
-    title:"Intervals",
-    incline:"1.0%",
-    blocks:[
-      { label:"Warm-up", items:[
-        "Incline 1.0%",
-        "3 min jog @ 9.0–10.0 km/h",
-        "2 × 20s fast strides @ 14–15 km/h (easy walk 40s)"
-      ]},
-      { label:"Main", items:[
-        "6 rounds",
-        "Work: 95s @ 15.0 km/h (≈4:00/km)",
-        "Recovery: 90s @ 10.0 km/h (≈6:00/km)",
-        "Speed endurance (≈400m reps)"
-      ]},
-      { label:"Cool-down", items:[
-        "5 min easy jog/walk @ 6.0–8.0 km/h"
-      ]},
-    ]
-  },
-  fri: {
-    title:"Tempo / 2k pace",
-    incline:"1.0%",
-    blocks:[
-      { label:"Warm-up", items:[
-        "Incline 1.0%",
-        "5 min jog @ 9.0–10.0 km/h",
-        "1 × 60s @ 13.0 km/h then 60s easy"
-      ]},
-      { label:"Main", items:[
-        "10–12 min steady @ 12.5–13.5 km/h",
-        "Finish: 3 × 30s @ 15.0 km/h (60s easy @ 9–10 km/h)"
-      ]},
-      { label:"Cool-down", items:[
-        "5 min easy @ 6.0–8.0 km/h"
-      ]},
-    ]
-  },
-  sat: {
-    title:"Easy Run",
-    incline:"1.0%",
-    blocks:[
-      { label:"Main", items:[
-        "20–30 min easy @ 9.0–10.5 km/h",
-        "Optional: 4 × 15s strides @ 14–15 km/h (45s easy)"
-      ]},
-    ]
-  }
-};
-
-const mobilityList = [
-  { id:"couch", name:"Couch stretch (each side)", secs:60 },
-  { id:"calf",  name:"Calf stretch (each side)", secs:60 },
-  { id:"glute", name:"Glute stretch (each side)", secs:60 },
-  { id:"hips",  name:"Hip flexor rocks", secs:45 },
-  { id:"ankle", name:"Ankle rocks", secs:45 },
-];
-
-/* ========= STATE ========= */
-const todayISO = new Date().toISOString().slice(0,10);
-document.getElementById("dateTxt").innerText = todayISO;
-
-let state = load() || {
-  selectedDay:"mon",
-  week:1,
-  streak:0,
-  workout: { running:false, secs:0 },
-  strengthLog: {},      // { [week]: { [strengthKey]: { [exId]: { sets: {1:{kg,reps,done}}, ... } } } }
-  mobilityLog: {},      // { [week]: { [mobId]: {done:boolean} } }
-};
-
-function save(){
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-}
-
-/* ========= HELPERS ========= */
-function load(){
-  try{
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
-  }catch(e){ return null; }
-}
-
-function clampInt(v, fallback){
-  const n = parseInt(v,10);
-  return Number.isFinite(n) ? n : fallback;
-}
-
-function fmtHMS(s){
-  const h=Math.floor(s/3600);
-  const m=Math.floor((s%3600)/60);
-  const r=s%60;
-  return String(h).padStart(2,"0")+":"+String(m).padStart(2,"0")+":"+String(r).padStart(2,"0");
-}
-
-function fmtMS(s){
-  const m=Math.floor(s/60);
-  const r=s%60;
-  return String(m).padStart(2,"0")+":"+String(r).padStart(2,"0");
-}
-
-function getWeek(){
-  return clampInt(document.getElementById("weekNum").value, state.week || 1);
-}
-
-function setWeek(w){
-  state.week = w;
-  document.getElementById("weekNum").value = w;
-  save();
-}
-
-function getLWWeek(){
-  const w = getWeek();
-  return Math.max(1, w-1);
-}
-
-function ensureStrengthWeek(week, strengthKey){
-  state.strengthLog[week] ||= {};
-  state.strengthLog[week][strengthKey] ||= {};
-}
-
-function getSetLog(week, strengthKey, exId, setNo){
-  ensureStrengthWeek(week, strengthKey);
-  state.strengthLog[week][strengthKey][exId] ||= { sets:{} };
-  state.strengthLog[week][strengthKey][exId].sets[setNo] ||= { kg:"", reps:"", done:false };
-  return state.strengthLog[week][strengthKey][exId].sets[setNo];
-}
-
-function getMobWeek(week){
-  state.mobilityLog[week] ||= {};
-  return state.mobilityLog[week];
-}
-
-/* ========= WORKOUT TIMER ========= */
-let workoutId = null;
-
-function syncWorkoutUI(){
-  document.getElementById("streakTxt").innerText = state.streak || 0;
-  document.getElementById("workoutTime").innerText = fmtHMS(state.workout.secs || 0);
-  document.getElementById("workoutState").innerText = state.workout.running ? "Running" : "Paused";
-}
-
+/* ===== WORKOUT TIMER ===== */
+let wInt,wSec=0;
 function startWorkout(){
-  if(state.workout.running) return;
-  state.workout.running = true;
-  save();
-  syncWorkoutUI();
-  workoutId = setInterval(()=>{
-    state.workout.secs = (state.workout.secs || 0) + 1;
-    document.getElementById("workoutTime").innerText = fmtHMS(state.workout.secs);
-    save();
-  },1000);
+  if(wInt) return;
+  wInt=setInterval(()=>{wSec++;updateWorkout()},1000);
+}
+function pauseWorkout(){clearInterval(wInt);wInt=null}
+function endWorkout(){pauseWorkout();alert("Workout saved")}
+function updateWorkout(){
+  const h=String(Math.floor(wSec/3600)).padStart(2,"0");
+  const m=String(Math.floor(wSec%3600/60)).padStart(2,"0");
+  const s=String(wSec%60).padStart(2,"0");
+  workoutTime.textContent=`${h}:${m}:${s}`;
 }
 
-function pauseWorkout(){
-  state.workout.running = false;
-  save();
-  syncWorkoutUI();
-  clearInterval(workoutId);
-  workoutId = null;
-}
-
-function endWorkout(){
-  pauseWorkout();
-  // streak: only count if workout time >= 10 min
-  if((state.workout.secs||0) >= 600){
-    state.streak = (state.streak||0) + 1;
-  }
-  state.workout.secs = 0;
-  save();
-  syncWorkoutUI();
-  alert("Workout saved.");
-}
-
-/* ========= RENDER ========= */
-const daySelect = document.getElementById("daySelect");
-days.forEach(d=>{
-  const opt = document.createElement("option");
-  opt.value = d.key;
-  opt.textContent = d.name;
-  daySelect.appendChild(opt);
-});
-daySelect.value = state.selectedDay || "mon";
-
-document.getElementById("weekNum").value = state.week || 1;
-document.getElementById("weekNum").addEventListener("change", ()=>{
-  setWeek(clampInt(document.getElementById("weekNum").value, 1));
-  render();
-});
-
-daySelect.addEventListener("change", ()=>{
-  state.selectedDay = daySelect.value;
-  save();
-  render();
-});
-
-function render(){
-  syncWorkoutUI();
-
-  const container = document.getElementById("content");
-  container.innerHTML = "";
-
-  const day = days.find(d=>d.key===daySelect.value);
-
-  // hide interval timer on strength days by rendering only what day type needs
-  if(day.type === "strength"){
-    container.appendChild(renderStrength(day.strengthKey));
-    container.appendChild(renderRestTimer());
-    container.appendChild(renderMobilityBox(true)); // show mobility box under strength too
-  }
-
-  if(day.type === "runIntervals"){
-    container.appendChild(renderRun(day.key, true));
-    container.appendChild(renderIntervalTimer()); // only here
-    container.appendChild(renderMobilityBox(false));
-  }
-
-  if(day.type === "run"){
-    container.appendChild(renderRun("fri", false));
-    container.appendChild(renderRunTimer());
-    container.appendChild(renderMobilityBox(false));
-  }
-
-  if(day.type === "runEasy"){
-    container.appendChild(renderRun("sat", false));
-    container.appendChild(renderRunTimer());
-    container.appendChild(renderMobilityBox(false));
-  }
-
-  if(day.type === "mobilityOnly"){
-    container.appendChild(renderMobilityBox(false, true));
-  }
-
-  if(day.type === "rest"){
-    const c = document.createElement("div");
-    c.className = "card";
-    c.innerHTML = `
-      <h2>Rest</h2>
-      <div class="small">Full rest day. Optional easy walk + light mobility.</div>
-    `;
-    container.appendChild(c);
-  }
-}
-
-function renderStrength(strengthKey){
-  const week = getWeek();
-  const lwWeek = getLWWeek();
-  const plan = strengthPlans[strengthKey];
-
-  const card = document.createElement("div");
-  card.className = "card";
-  card.innerHTML = `
-    <h2>${(strengthKey==="A"?"Mon":"Thu")} – ${plan.title}</h2>
-    <div class="small">Log kg + reps • compare against <b>LW</b> to progress</div>
-  `;
-
-  plan.exercises.forEach(ex=>{
-    const exWrap = document.createElement("div");
-    exWrap.style.marginTop = "14px";
-    exWrap.innerHTML = `
-      <div class="exerciseTitleRow">
-        <div>
-          <h3 style="margin:0">${ex.name}</h3>
-          <div class="small">${ex.sets} sets • target reps: ${ex.targetReps} • ${ex.note}</div>
-        </div>
-        <div class="badge">Week ${week} (LW ${lwWeek})</div>
-      </div>
-
-      <div class="setGridHeader small">
-        <div>Set</div><div>kg</div><div>LW</div><div>reps</div><div>LW</div><div>Done</div>
-      </div>
-    `;
-
-    const grid = document.createElement("div");
-    grid.className = "setGrid";
-
-    for(let s=1; s<=ex.sets; s++){
-      const cur = getSetLog(week, strengthKey, ex.id, s);
-      const lw  = getSetLog(lwWeek, strengthKey, ex.id, s); // ensures existence; ok if blank
-
-      const setLabel = document.createElement("div");
-      setLabel.textContent = `#${s}`;
-
-      const kgInput = document.createElement("input");
-      kgInput.inputMode = "decimal";
-      kgInput.placeholder = "kg";
-      kgInput.value = cur.kg || "";
-      kgInput.addEventListener("input", ()=>{
-        cur.kg = kgInput.value;
-        save();
-        // update display without full render
-      });
-
-      const lwKg = document.createElement("div");
-      lwKg.className = "lwCell";
-      lwKg.textContent = lw.kg ? lw.kg : "—";
-
-      const repsInput = document.createElement("input");
-      repsInput.inputMode = "numeric";
-      repsInput.placeholder = String(ex.targetReps);
-      repsInput.value = cur.reps || String(ex.targetReps);
-      repsInput.addEventListener("input", ()=>{
-        cur.reps = repsInput.value;
-        save();
-      });
-
-      const lwReps = document.createElement("div");
-      lwReps.className = "lwCell";
-      lwReps.textContent = lw.reps ? lw.reps : "—";
-
-      const done = document.createElement("input");
-      done.type = "checkbox";
-      done.className = "doneBox";
-      done.checked = !!cur.done;
-      done.addEventListener("change", ()=>{
-        cur.done = done.checked;
-        save();
-        if(done.checked && document.getElementById("autoRest").checked){
-          startRest(); // auto-start rest
-        }
-      });
-
-      grid.appendChild(setLabel);
-      grid.appendChild(kgInput);
-      grid.appendChild(lwKg);
-      grid.appendChild(repsInput);
-      grid.appendChild(lwReps);
-      grid.appendChild(done);
-    }
-
-    exWrap.appendChild(grid);
-    card.appendChild(exWrap);
-  });
-
-  return card;
-}
-
-/* ========= REST TIMER (strength only) ========= */
-let restId = null;
-let restLeft = 90;
-
-function renderRestTimer(){
-  const card = document.createElement("div");
-  card.className = "card";
-  card.innerHTML = `
-    <h2>Rest timer</h2>
-    <div class="row" style="gap:8px;flex-wrap:nowrap">
-      <button onclick="presetRest(60)">60s</button>
-      <button onclick="presetRest(90)">90s</button>
-      <button onclick="presetRest(120)">120s</button>
-      <input id="restInput" value="${restLeft}" style="max-width:110px" />
-      <div class="small" style="flex:0 0 auto">sec</div>
-    </div>
-
-    <div class="timerMid" id="restTime">${fmtMS(restLeft)}</div>
-
-    <div class="row" style="gap:8px;flex-wrap:nowrap">
-      <button class="primary" onclick="startRest()">Start</button>
-      <button onclick="pauseRest()">Pause</button>
-      <button onclick="resetRest()">Reset</button>
-    </div>
-  `;
-  return card;
-}
-
-function presetRest(s){
-  restLeft = s;
-  const input = document.getElementById("restInput");
-  const t = document.getElementById("restTime");
-  if(input) input.value = String(s);
-  if(t) t.textContent = fmtMS(restLeft);
-}
-
+/* ===== REST TIMER ===== */
+let rInt,rLeft=90;
+function setRest(s){rLeft=s;updateRest()}
 function startRest(){
-  const input = document.getElementById("restInput");
-  const t = document.getElementById("restTime");
-  if(!input || !t) return;
-
-  const v = clampInt(input.value, 90);
-  if(restLeft<=0 || restLeft===v) restLeft = v;
-
-  if(restId) return;
-  restId = setInterval(()=>{
-    restLeft--;
-    t.textContent = fmtMS(Math.max(0, restLeft));
-    if(restLeft<=0){
-      clearInterval(restId); restId = null;
-    }
+  clearInterval(rInt);
+  rInt=setInterval(()=>{
+    rLeft--;updateRest();
+    if(rLeft<=0){clearInterval(rInt)}
   },1000);
 }
-function pauseRest(){ clearInterval(restId); restId = null; }
-function resetRest(){
-  pauseRest();
-  const input = document.getElementById("restInput");
-  const v = clampInt(input?.value, 90);
-  restLeft = v;
-  const t = document.getElementById("restTime");
-  if(t) t.textContent = fmtMS(restLeft);
+function updateRest(){
+  restTime.textContent=`${String(Math.floor(rLeft/60)).padStart(2,"0")}:${String(rLeft%60).padStart(2,"0")}`;
 }
 
-/* ========= RUN BLOCKS ========= */
-function renderRun(key, showRunTimer){
-  const plan = runPlans[key];
-  const card = document.createElement("div");
-  card.className = "card";
-  card.innerHTML = `
-    <h2>${key==="tue"?"Tue":"Fri/Sat"} – ${plan.title}</h2>
-    <div class="small">Incline ${plan.incline} • Speeds shown so you can set the treadmill</div>
-    <hr/>
-  `;
+/* ===== MOBILITY TIMER ===== */
+let mInt,mLeft=0;
+function startMobility(s){
+  clearInterval(mInt);
+  mLeft=s;
+  mInt=setInterval(()=>{
+    mLeft--;
+    mobTime.textContent=`${String(Math.floor(mLeft/60)).padStart(2,"0")}:${String(mLeft%60).padStart(2,"0")}`;
+    if(mLeft<=0) clearInterval(mInt);
+  },1000);
+}
 
-  plan.blocks.forEach(b=>{
-    const sec = document.createElement("div");
-    sec.style.marginTop = "10px";
-    sec.innerHTML = `<h3 style="margin-bottom:6px">${b.label}</h3>`;
-    const ul = document.createElement("ul");
-    ul.style.margin = "0 0 0 18px";
-    ul.style.padding = "0";
-    b.items.forEach(it=>{
-      const li = document.createElement("li");
-      li.style.margin = "6px 0";
-      li.textContent = it;
-      ul.appendChild(li);
-    });
-    sec.appendChild(ul);
-    card.appendChild(sec);
-  });
-
-  if(showRunTimer){
-    card.appendChild(renderRunTimer());
+/* ===== SET GENERATOR ===== */
+function makeSets(el,count){
+  for(let i=1;i<=count;i++){
+    el.innerHTML+=`
+    <div class="setRow">
+      <div>#${i}</div>
+      <input placeholder="kg">
+      <input placeholder="LW">
+      <input value="3">
+      <input type="checkbox" class="checkbox">
+    </div>`;
   }
-  return card;
 }
 
-/* ========= RUN TIMER (stopwatch) ========= */
-let runId = null;
-let runSec = 0;
-
-function renderRunTimer(){
-  const wrap = document.createElement("div");
-  wrap.className = "card";
-  wrap.innerHTML = `
-    <h2>Run timer</h2>
-    <div class="timerMid" id="runTime">${fmtMS(runSec)}</div>
-    <div class="row" style="gap:8px;flex-wrap:nowrap">
-      <button class="primary" onclick="startRun()">Start</button>
-      <button onclick="pauseRun()">Pause</button>
-      <button onclick="resetRun()">Reset</button>
-    </div>
-    <div class="small" style="margin-top:10px">Tip: use for tempo runs / total time.</div>
-  `;
-  return wrap;
-}
-function startRun(){
-  if(runId) return;
-  runId = setInterval(()=>{
-    runSec++;
-    const el = document.getElementById("runTime");
-    if(el) el.textContent = fmtMS(runSec);
-  },1000);
-}
-function pauseRun(){ clearInterval(runId); runId=null; }
-function resetRun(){ pauseRun(); runSec=0; const el=document.getElementById("runTime"); if(el) el.textContent="00:00"; }
-
-/* ========= INTERVAL TIMER (only for intervals day) ========= */
-let intervalId = null;
-let intervalSec = 0;
-
-function renderIntervalTimer(){
-  const card = document.createElement("div");
-  card.className = "card";
-  card.innerHTML = `
-    <h2>Interval Timer</h2>
-    <div class="small">Use for work/rest blocks. (Only shown on interval day)</div>
-    <div class="timerMid" id="intervalTime">${fmtMS(intervalSec)}</div>
-
-    <div class="row" style="gap:8px;flex-wrap:nowrap">
-      <button class="primary" onclick="startInterval()">Start</button>
-      <button onclick="pauseInterval()">Pause</button>
-      <button onclick="stopInterval()">Stop</button>
-    </div>
-
-    <div style="margin-top:10px"><input id="workSec" placeholder="Work (sec)" value="95"/></div>
-    <div style="margin-top:10px"><input id="restSec" placeholder="Rest (sec)" value="90"/></div>
-    <div style="margin-top:10px"><input id="rounds" placeholder="Rounds" value="6"/></div>
-  `;
-  return card;
-}
-
-function startInterval(){
-  if(intervalId) return;
-  intervalId = setInterval(()=>{
-    intervalSec++;
-    const el = document.getElementById("intervalTime");
-    if(el) el.textContent = fmtMS(intervalSec);
-  },1000);
-}
-function pauseInterval(){ clearInterval(intervalId); intervalId=null; }
-function stopInterval(){ pauseInterval(); intervalSec=0; const el=document.getElementById("intervalTime"); if(el) el.textContent="00:00"; }
-
-/* ========= MOBILITY (separate box + countdown + tick per item) ========= */
-let mobTimerId = null;
-let mobLeft = 0;
-let mobNowId = null;
-
-function renderMobilityBox(showHeader, onlyMobilityDay=false){
-  const week = getWeek();
-  const mobWeek = getMobWeek(week);
-
-  const card = document.createElement("div");
-  card.className = "card";
-  card.innerHTML = `
-    <h2>Mobility</h2>
-    <div class="small">${onlyMobilityDay ? "Recovery day. Work through these slowly." : "Do after session or as a stand-alone block."}</div>
-    <div class="mobNow" style="margin-top:10px">
-      <div class="small">Current</div>
-      <div style="font-weight:900;font-size:16px;margin-top:2px" id="mobNowName">—</div>
-      <div class="timerMid" id="mobNowTime">${fmtMS(mobLeft)}</div>
-      <div class="mobTimerRow">
-        <button class="primary" onclick="startMobility()">Start</button>
-        <button onclick="pauseMobility()">Pause</button>
-        <button onclick="nextMobility()">Next</button>
-        <button onclick="resetMobility()">Reset</button>
-      </div>
-      <div class="small" style="margin-top:8px">Tick each item when done. Timer counts down per item.</div>
-    </div>
-
-    <div style="margin-top:10px" id="mobList"></div>
-  `;
-
-  // list
-  const listDiv = card.querySelector("#mobList");
-  mobilityList.forEach(m=>{
-    mobWeek[m.id] ||= { done:false };
-
-    const row = document.createElement("div");
-    row.className = "mobItem";
-
-    const cb = document.createElement("input");
-    cb.type = "checkbox";
-    cb.checked = !!mobWeek[m.id].done;
-    cb.addEventListener("change", ()=>{
-      mobWeek[m.id].done = cb.checked;
-      save();
-    });
-
-    const name = document.createElement("div");
-    name.className = "name";
-    name.innerHTML = `<div style="font-weight:700">${m.name}</div><div class="small">${m.secs}s</div>`;
-
-    const dur = document.createElement("input");
-    dur.className = "dur";
-    dur.type = "number";
-    dur.min = "10";
-    dur.value = m.secs;
-    dur.addEventListener("change", ()=>{
-      m.secs = clampInt(dur.value, m.secs);
-      // if currently selected item, update countdown baseline
-      if(mobNowId===m.id){
-        mobLeft = m.secs;
-        const t = document.getElementById("mobNowTime");
-        if(t) t.textContent = fmtMS(mobLeft);
-      }
-    });
-
-    const pick = document.createElement("button");
-    pick.textContent = "Set";
-    pick.onclick = ()=>{
-      mobNowId = m.id;
-      mobLeft = m.secs;
-      document.getElementById("mobNowName").textContent = m.name;
-      document.getElementById("mobNowTime").textContent = fmtMS(mobLeft);
-    };
-
-    row.appendChild(cb);
-    row.appendChild(name);
-    row.appendChild(dur);
-    row.appendChild(pick);
-    listDiv.appendChild(row);
-  });
-
-  // set first item default if none
-  if(!mobNowId){
-    mobNowId = mobilityList[0].id;
-    mobLeft = mobilityList[0].secs;
-    setTimeout(()=>{
-      const n = document.getElementById("mobNowName");
-      const t = document.getElementById("mobNowTime");
-      if(n) n.textContent = mobilityList[0].name;
-      if(t) t.textContent = fmtMS(mobLeft);
-    },0);
-  }else{
-    const cur = mobilityList.find(x=>x.id===mobNowId) || mobilityList[0];
-    mobLeft = cur.secs;
-    setTimeout(()=>{
-      const n = document.getElementById("mobNowName");
-      const t = document.getElementById("mobNowTime");
-      if(n) n.textContent = cur.name;
-      if(t) t.textContent = fmtMS(mobLeft);
-    },0);
-  }
-
-  return card;
-}
-
-function startMobility(){
-  if(mobTimerId) return;
-  if(!mobNowId){
-    mobNowId = mobilityList[0].id;
-    mobLeft = mobilityList[0].secs;
-  }
-  mobTimerId = setInterval(()=>{
-    mobLeft--;
-    const t = document.getElementById("mobNowTime");
-    if(t) t.textContent = fmtMS(Math.max(0, mobLeft));
-    if(mobLeft<=0){
-      clearInterval(mobTimerId); mobTimerId=null;
-    }
-  },1000);
-}
-function pauseMobility(){ clearInterval(mobTimerId); mobTimerId=null; }
-function resetMobility(){
-  pauseMobility();
-  const cur = mobilityList.find(x=>x.id===mobNowId) || mobilityList[0];
-  mobLeft = cur.secs;
-  const n = document.getElementById("mobNowName");
-  const t = document.getElementById("mobNowTime");
-  if(n) n.textContent = cur.name;
-  if(t) t.textContent = fmtMS(mobLeft);
-}
-function nextMobility(){
-  pauseMobility();
-  const idx = Math.max(0, mobilityList.findIndex(x=>x.id===mobNowId));
-  const next = mobilityList[(idx+1) % mobilityList.length];
-  mobNowId = next.id;
-  mobLeft = next.secs;
-  document.getElementById("mobNowName").textContent = next.name;
-  document.getElementById("mobNowTime").textContent = fmtMS(mobLeft);
-}
-
-/* ========= RESET ========= */
-function resetDay(){ location.reload(); }
-function resetWeek(){
-  localStorage.removeItem(STORAGE_KEY);
-  location.reload();
-}
-
-/* ========= INIT ========= */
-render();
-syncWorkoutUI();
+makeSets(deadlift,4);
+makeSets(bulgarian,3);
+makeSets(boxjumps,3);
 </script>
 </body>
 </html>
