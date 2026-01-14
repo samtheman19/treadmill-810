@@ -1,268 +1,215 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>2 km 8:10 – Treadmill Routine</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0b0f" />
+  <title>2 km 8:10 – Treadmill Routine</title>
 
-<style>
-:root{
-  --bg:#0b0b0f;
-  --card:#15151c;
-  --muted:#9aa0a6;
-  --accent:#6fd3ff;
-  --border:#22232b;
-}
+  <link rel="manifest" href="manifest.json" />
 
-*{box-sizing:border-box}
-html,body{
-  margin:0;
-  background:var(--bg);
-  color:#fff;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
-  overflow-x:hidden;
-}
+  <style>
+    :root{
+      --bg:#0b0b0f;
+      --card:#15151c;
+      --card2:#101017;
+      --muted:#9aa0a6;
+      --text:#ffffff;
+      --accent:#6fd3ff;
+      --line:rgba(255,255,255,.08);
+      --pill:rgba(255,255,255,.06);
+    }
+    *{box-sizing:border-box;}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,Arial,sans-serif;overflow-x:hidden;}
+    a{color:var(--accent);}
+    .app{max-width:460px;margin:0 auto;padding:18px 14px 34px;}
+    h1{margin:4px 0 14px;font-size:28px;letter-spacing:-.3px;}
+    .sub{margin:-8px 0 14px;color:var(--muted);font-size:13px;line-height:1.35;}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+    .spacer{flex:1;}
+    .btn{border:0;background:var(--pill);color:var(--text);padding:10px 14px;border-radius:14px;font-weight:600;cursor:pointer;}
+    .btnPrimary{background:var(--accent);color:#081018;}
+    .btnSmall{padding:9px 12px;border-radius:12px;font-weight:700;}
+    .chip{background:var(--pill);padding:10px 12px;border-radius:14px;color:var(--text);display:flex;align-items:center;gap:8px;}
+    select,input{background:var(--card2);border:1px solid var(--line);color:var(--text);border-radius:14px;padding:10px 12px;font-size:14px;max-width:100%;}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));border:1px solid var(--line);border-radius:22px;padding:16px;margin:14px 0;}
+    .cardTitle{font-size:18px;font-weight:800;margin:0 0 6px;}
+    .muted{color:var(--muted);}
+    .hr{height:1px;background:var(--line);margin:14px 0;}
+    .bigTime{font-size:52px;font-weight:900;letter-spacing:1px;line-height:1;margin:8px 0 10px;}
+    .tiny{font-size:12px;color:var(--muted);}
 
-.app{
-  max-width:420px;
-  margin:0 auto;
-  padding:14px;
-}
+    /* Exercise layout */
+    .dayTitle{font-size:22px;font-weight:900;margin:0 0 10px;}
+    .exTitle{font-size:22px;font-weight:900;margin:6px 0 6px;}
+    .exMeta{color:var(--muted);font-size:13px;margin:0 0 10px;}
+    .tableHead{display:grid;grid-template-columns:38px minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) 40px 44px;gap:8px;align-items:center;color:var(--muted);font-size:12px;font-weight:700;margin:8px 0 6px;}
+    .setRow{display:grid;grid-template-columns:38px minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) 40px 44px;gap:8px;align-items:center;margin:8px 0;}
+    .setRow > *{min-width:0;}
+    .setNum{color:var(--text);font-weight:800;}
+    .pillInput{
+      width:100%;
+      height:38px;
+      padding:8px 10px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.04);
+      font-weight:700;
+    }
+    .pillRead{
+      width:100%;
+      height:38px;
+      padding:8px 10px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+      color:rgba(255,255,255,.75);
+      font-weight:800;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .doneWrap{display:flex;justify-content:center;}
+    .done{width:22px;height:22px;accent-color:var(--accent);}
 
-h1{font-size:20px;margin:8px 0}
-h2{font-size:17px;margin:0 0 6px}
-small{color:var(--muted)}
+    /* Small countdown box next to tick */
+    .restBox{
+      width:40px;height:38px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+      color:rgba(255,255,255,.85);
+      display:flex;align-items:center;justify-content:center;
+      font-weight:900;
+      font-variant-numeric:tabular-nums;
+    }
 
-button{
-  background:#22232b;
-  color:#fff;
-  border:none;
-  padding:10px 14px;
-  border-radius:14px;
-  font-size:15px;
-}
+    /* Rest settings at end */
+    .restSettings{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+    .restPresets{display:flex;gap:10px;flex-wrap:wrap;}
+    .restTime{font-size:44px;font-weight:900;letter-spacing:.5px;margin:4px 0;}
+    .footerNote{margin-top:18px;color:var(--muted);font-size:12px;}
 
-.primary{background:var(--accent);color:#000;font-weight:600}
+    /* Collapsible sections */
+    details{margin:8px 0;}
+    summary{cursor:pointer;color:var(--muted);font-weight:800;user-select:none;}
+    ul{margin:10px 0 0 18px;color:var(--text);}
+    li{margin:6px 0;color:rgba(255,255,255,.9);}
 
-.card{
-  background:var(--card);
-  border-radius:18px;
-  padding:14px;
-  margin:12px 0;
-  overflow-x:hidden;
-}
+    /* Mobility box with ticks + per-item countdown */
+    .mobItem{
+      display:grid;
+      grid-template-columns: 1fr 92px 44px 44px;
+      gap:10px;
+      align-items:center;
+      margin:10px 0;
+    }
+    .mobName{font-weight:800;}
+    .mobTimer{font-variant-numeric:tabular-nums;font-weight:900;text-align:center;}
+    .mobBtn{width:44px;height:38px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:#fff;font-weight:900;}
+    .mobDone{display:flex;justify-content:center;}
+    .mobChk{width:22px;height:22px;accent-color:var(--accent);}
 
-.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-
-.spread{display:flex;justify-content:space-between;align-items:center}
-
-label{font-size:13px;color:var(--muted)}
-
-input{
-  width:100%;
-  background:#1b1c24;
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:8px;
-  color:#fff;
-  font-size:14px;
-}
-
-.checkbox{width:22px;height:22px}
-
-/* ===== SET TABLE (NO HORIZONTAL SCROLL) ===== */
-.setHeader,.setRow{
-  display:grid;
-  grid-template-columns:30px minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) 34px;
-  gap:6px;
-  align-items:center;
-  width:100%;
-}
-
-.setHeader{
-  font-size:12px;
-  color:var(--muted);
-  margin-bottom:6px;
-}
-
-.setRow input{height:34px;padding:6px;font-size:13px}
-
-/* ===== TIMERS ===== */
-.timer{
-  font-size:36px;
-  font-weight:700;
-  text-align:center;
-  margin:8px 0;
-}
-
-/* ===== MOBILITY ===== */
-.mobRow{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
-  margin:6px 0;
-}
-</style>
+    /* Keep it tight on small screens */
+    @media (max-width: 380px){
+      .tableHead,.setRow{grid-template-columns:34px minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) 36px 44px;}
+      .restBox{width:36px;}
+    }
+  </style>
 </head>
 
 <body>
-<div class="app">
-
-<h1>2 km 8:10 – Treadmill Routine</h1>
-
-<div class="card">
-  <div class="spread">
-    <div>
-      <strong>Workout</strong><br>
-      <small id="today"></small>
+  <div class="app">
+    <h1>2 km 8:10 – Treadmill Routine</h1>
+    <div class="sub">
+      Incline 1.0% · Race pace 14.7 km/h · Tick warm-up / main / mobility · Saves on this device
     </div>
-    <button class="primary" onclick="startWorkout()">Start</button>
+
+    <!-- Top controls (RESTORED day selector) -->
+    <div class="row">
+      <div class="chip">
+        <span class="muted" style="font-weight:800;">Day</span>
+        <select id="daySelect" aria-label="Select day"></select>
+      </div>
+      <button class="btn" id="resetDayBtn">Reset day</button>
+      <div class="spacer"></div>
+      <button class="btn btnPrimary" id="resetWeekBtn">Reset week</button>
+    </div>
+
+    <!-- Workout timer (NO auto-start text here anymore) -->
+    <div class="card" id="sessionCard">
+      <div class="row">
+        <div>
+          <div class="cardTitle">Workout</div>
+          <div class="muted" id="sessionDate"></div>
+        </div>
+        <div class="spacer"></div>
+        <button class="btn btnPrimary" id="sessionStartBtn">Start</button>
+      </div>
+
+      <div class="bigTime" id="sessionTime">00:00:00</div>
+
+      <div class="row">
+        <button class="btn" id="sessionPauseBtn">Pause</button>
+        <button class="btn" id="sessionEndBtn">End (save)</button>
+      </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="card" id="dayCard">
+      <div class="dayTitle" id="dayTitle">—</div>
+
+      <details open>
+        <summary>Warm-up</summary>
+        <ul id="warmupList"></ul>
+      </details>
+
+      <div class="hr"></div>
+
+      <div id="mainBlock"></div>
+
+      <div class="hr"></div>
+
+      <!-- Rest timer settings at the END (applies when you tick sets) -->
+      <div>
+        <div class="cardTitle">Rest timer</div>
+        <div class="muted">Tick a set to auto-start the rest countdown next to it.</div>
+
+        <div class="restSettings" style="margin-top:10px;">
+          <div class="restPresets">
+            <button class="btn btnSmall" data-rest="60">60s</button>
+            <button class="btn btnSmall" data-rest="90">90s</button>
+            <button class="btn btnSmall" data-rest="120">120s</button>
+          </div>
+          <div class="spacer"></div>
+          <label class="muted" style="font-weight:800;">Seconds</label>
+          <input id="restSeconds" type="number" min="10" max="600" step="5" style="width:110px;" />
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <!-- Mobility in a separate box with per-item timer + tick -->
+      <div class="card" style="margin:0; padding:14px;" id="mobilityCard">
+        <div class="cardTitle">Mobility</div>
+        <div class="muted" style="margin-bottom:10px;">Use Start to count down, tick when done.</div>
+        <div id="mobilityList"></div>
+      </div>
+    </div>
+
+    <div class="footerNote">
+      Install: Safari → Share → Add to Home Screen · Offline works after first load.
+    </div>
   </div>
 
-  <div class="timer" id="workoutTime">00:00:00</div>
-
-  <div class="row">
-    <button onclick="pauseWorkout()">Pause</button>
-    <button onclick="endWorkout()">End (save)</button>
-  </div>
-
-  <label style="display:flex;align-items:center;gap:8px;margin-top:8px">
-    <input type="checkbox" class="checkbox" checked />
-    Auto-start rest when set done
-  </label>
-</div>
-
-<!-- ================= STRENGTH ================= -->
-<div class="card">
-<h2>Mon – Strength A</h2>
-
-<h3>Trap Bar Deadlift</h3>
-<small>4 sets • target reps 3 • fast, no grind</small>
-
-<div class="setHeader">
-  <div>#</div><div>kg</div><div>LW</div><div>reps</div><div>✓</div>
-</div>
-
-<div id="deadlift"></div>
-
-<div class="card">
-  <label>Rest timer</label>
-  <div class="timer" id="restTime">01:30</div>
-  <div class="row">
-    <button onclick="setRest(60)">60s</button>
-    <button onclick="setRest(90)">90s</button>
-    <button onclick="setRest(120)">120s</button>
-    <button class="primary" onclick="startRest()">Start</button>
-  </div>
-</div>
-
-<h3>Bulgarian Split Squat</h3>
-<small>3 sets • target reps 5 • each leg</small>
-
-<div class="setHeader">
-  <div>#</div><div>kg</div><div>LW</div><div>reps</div><div>✓</div>
-</div>
-
-<div id="bulgarian"></div>
-
-<h3>Box Jumps</h3>
-<small>3 sets • target reps 3</small>
-
-<div class="setHeader">
-  <div>#</div><div>kg</div><div>LW</div><div>reps</div><div>✓</div>
-</div>
-
-<div id="boxjumps"></div>
-
-</div>
-
-<!-- ================= MOBILITY ================= -->
-<div class="card">
-<h2>Mobility</h2>
-
-<div class="mobRow">
-  <span>Couch stretch (1 min / side)</span>
-  <button onclick="startMobility(60)">Start</button>
-</div>
-
-<div class="mobRow">
-  <span>Calf stretch (1 min / side)</span>
-  <button onclick="startMobility(60)">Start</button>
-</div>
-
-<div class="mobRow">
-  <span>Glute stretch (1 min / side)</span>
-  <button onclick="startMobility(60)">Start</button>
-</div>
-
-<div class="timer" id="mobTime">00:00</div>
-</div>
-
-</div>
-
-<script>
-const todayEl=document.getElementById("today");
-todayEl.textContent=new Date().toDateString();
-
-/* ===== WORKOUT TIMER ===== */
-let wInt,wSec=0;
-function startWorkout(){
-  if(wInt) return;
-  wInt=setInterval(()=>{wSec++;updateWorkout()},1000);
-}
-function pauseWorkout(){clearInterval(wInt);wInt=null}
-function endWorkout(){pauseWorkout();alert("Workout saved")}
-function updateWorkout(){
-  const h=String(Math.floor(wSec/3600)).padStart(2,"0");
-  const m=String(Math.floor(wSec%3600/60)).padStart(2,"0");
-  const s=String(wSec%60).padStart(2,"0");
-  workoutTime.textContent=`${h}:${m}:${s}`;
-}
-
-/* ===== REST TIMER ===== */
-let rInt,rLeft=90;
-function setRest(s){rLeft=s;updateRest()}
-function startRest(){
-  clearInterval(rInt);
-  rInt=setInterval(()=>{
-    rLeft--;updateRest();
-    if(rLeft<=0){clearInterval(rInt)}
-  },1000);
-}
-function updateRest(){
-  restTime.textContent=`${String(Math.floor(rLeft/60)).padStart(2,"0")}:${String(rLeft%60).padStart(2,"0")}`;
-}
-
-/* ===== MOBILITY TIMER ===== */
-let mInt,mLeft=0;
-function startMobility(s){
-  clearInterval(mInt);
-  mLeft=s;
-  mInt=setInterval(()=>{
-    mLeft--;
-    mobTime.textContent=`${String(Math.floor(mLeft/60)).padStart(2,"0")}:${String(mLeft%60).padStart(2,"0")}`;
-    if(mLeft<=0) clearInterval(mInt);
-  },1000);
-}
-
-/* ===== SET GENERATOR ===== */
-function makeSets(el,count){
-  for(let i=1;i<=count;i++){
-    el.innerHTML+=`
-    <div class="setRow">
-      <div>#${i}</div>
-      <input placeholder="kg">
-      <input placeholder="LW">
-      <input value="3">
-      <input type="checkbox" class="checkbox">
-    </div>`;
-  }
-}
-
-makeSets(deadlift,4);
-makeSets(bulgarian,3);
-makeSets(boxjumps,3);
-</script>
+  <script src="app.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./sw.js").catch(()=>{});
+    }
+  </script>
 </body>
 </html>
