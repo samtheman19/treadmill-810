@@ -20,12 +20,7 @@
       --pill:rgba(255,255,255,.06);
     }
     *{box-sizing:border-box;}
-    html,body{
-      margin:0;padding:0;background:var(--bg);color:var(--text);
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,Arial,sans-serif;
-      overflow-x:hidden;
-      width:100%;
-    }
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,Arial,sans-serif;overflow-x:hidden;}
     a{color:var(--accent);}
     .app{max-width:460px;margin:0 auto;padding:18px 14px 34px;}
     h1{margin:4px 0 14px;font-size:28px;letter-spacing:-.3px;}
@@ -36,24 +31,8 @@
     .btnPrimary{background:var(--accent);color:#081018;}
     .btnSmall{padding:9px 12px;border-radius:12px;font-weight:700;}
     .chip{background:var(--pill);padding:10px 12px;border-radius:14px;color:var(--text);display:flex;align-items:center;gap:8px;}
-    select,input{
-      background:var(--card2);
-      border:1px solid var(--line);
-      color:var(--text);
-      border-radius:14px;
-      padding:10px 12px;
-      font-size:14px;
-      max-width:100%;
-      min-width:0;
-    }
-    .card{
-      background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));
-      border:1px solid var(--line);
-      border-radius:22px;
-      padding:16px;
-      margin:14px 0;
-      overflow-x:hidden;
-    }
+    select,input{background:var(--card2);border:1px solid var(--line);color:var(--text);border-radius:14px;padding:10px 12px;font-size:14px;max-width:100%;}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));border:1px solid var(--line);border-radius:22px;padding:16px;margin:14px 0;}
     .cardTitle{font-size:18px;font-weight:800;margin:0 0 6px;}
     .muted{color:var(--muted);}
     .hr{height:1px;background:var(--line);margin:14px 0;}
@@ -64,30 +43,10 @@
     .dayTitle{font-size:22px;font-weight:900;margin:0 0 10px;}
     .exTitle{font-size:22px;font-weight:900;margin:6px 0 6px;}
     .exMeta{color:var(--muted);font-size:13px;margin:0 0 10px;}
-
-    /* 7 columns:
-       # | kg | LW(kg) | reps | LW(reps) | rest | done
-    */
-    .tableHead{
-      display:grid;
-      grid-template-columns: 34px minmax(0,1fr) 54px minmax(0,1fr) 54px 44px 44px;
-      gap:8px;
-      align-items:center;
-      color:var(--muted);
-      font-size:12px;
-      font-weight:700;
-      margin:8px 0 6px;
-    }
-    .setRow{
-      display:grid;
-      grid-template-columns: 34px minmax(0,1fr) 54px minmax(0,1fr) 54px 44px 44px;
-      gap:8px;
-      align-items:center;
-      margin:8px 0;
-    }
+    .tableHead{display:grid;grid-template-columns:38px minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) 40px 44px;gap:8px;align-items:center;color:var(--muted);font-size:12px;font-weight:700;margin:8px 0 6px;}
+    .setRow{display:grid;grid-template-columns:38px minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) 40px 44px;gap:8px;align-items:center;margin:8px 0;}
     .setRow > *{min-width:0;}
     .setNum{color:var(--text);font-weight:800;}
-
     .pillInput{
       width:100%;
       height:38px;
@@ -95,7 +54,7 @@
       border-radius:14px;
       border:1px solid var(--line);
       background:rgba(255,255,255,.04);
-      font-weight:800;
+      font-weight:700;
     }
     .pillRead{
       width:100%;
@@ -105,7 +64,7 @@
       border:1px solid var(--line);
       background:rgba(255,255,255,.03);
       color:rgba(255,255,255,.75);
-      font-weight:900;
+      font-weight:800;
       display:flex;
       align-items:center;
       justify-content:center;
@@ -113,13 +72,12 @@
       overflow:hidden;
       text-overflow:ellipsis;
     }
-
     .doneWrap{display:flex;justify-content:center;}
     .done{width:22px;height:22px;accent-color:var(--accent);}
 
     /* Small countdown box next to tick */
     .restBox{
-      width:44px;height:38px;
+      width:40px;height:38px;
       border-radius:12px;
       border:1px solid var(--line);
       background:rgba(255,255,255,.03);
@@ -128,17 +86,6 @@
       font-weight:900;
       font-variant-numeric:tabular-nums;
     }
-
-    /* Rest settings at end */
-    .restSettings{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
-    .restPresets{display:flex;gap:10px;flex-wrap:wrap;}
-    .footerNote{margin-top:18px;color:var(--muted);font-size:12px;}
-
-    /* Collapsible sections */
-    details{margin:8px 0;}
-    summary{cursor:pointer;color:var(--muted);font-weight:800;user-select:none;}
-    ul{margin:10px 0 0 18px;color:var(--text);}
-    li{margin:6px 0;color:rgba(255,255,255,.9);}
 
     /* Mobility box with ticks + per-item countdown */
     .mobItem{
@@ -150,23 +97,14 @@
     }
     .mobName{font-weight:800;}
     .mobTimer{font-variant-numeric:tabular-nums;font-weight:900;text-align:center;}
-    .mobBtn{
-      width:44px;height:38px;border-radius:12px;
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.04);
-      color:#fff;font-weight:900;
-    }
+    .mobBtn{width:44px;height:38px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:#fff;font-weight:900;}
     .mobDone{display:flex;justify-content:center;}
     .mobChk{width:22px;height:22px;accent-color:var(--accent);}
 
-    /* Extra-tight iPhone widths */
+    /* Keep it tight on small screens */
     @media (max-width: 380px){
-      .tableHead,.setRow{
-        grid-template-columns: 32px minmax(0,1fr) 50px minmax(0,1fr) 50px 40px 40px;
-        gap:7px;
-      }
-      .restBox{width:40px;}
-      .pillInput,.pillRead{height:36px;border-radius:12px;}
+      .tableHead,.setRow{grid-template-columns:34px minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) 36px 44px;}
+      .restBox{width:36px;}
     }
   </style>
 </head>
@@ -184,6 +122,16 @@
         <span class="muted" style="font-weight:800;">Day</span>
         <select id="daySelect" aria-label="Select day"></select>
       </div>
+
+      <!-- NEW: Mode selector -->
+      <div class="chip">
+        <span class="muted" style="font-weight:800;">Mode</span>
+        <select id="modeSelect" aria-label="Select mode">
+          <option value="treadmill">Treadmill</option>
+          <option value="outdoor">Outdoor</option>
+        </select>
+      </div>
+
       <button class="btn" id="resetDayBtn">Reset day</button>
       <div class="spacer"></div>
       <button class="btn btnPrimary" id="resetWeekBtn">Reset week</button>
@@ -223,7 +171,7 @@
 
       <div class="hr"></div>
 
-      <!-- Mobility box -->
+      <!-- Mobility -->
       <div class="card" style="margin:0; padding:14px;" id="mobilityCard">
         <div class="cardTitle">Mobility</div>
         <div class="muted" style="margin-bottom:10px;">Use Start to count down, tick when done.</div>
@@ -231,7 +179,7 @@
       </div>
     </div>
 
-    <div class="footerNote">
+    <div class="tiny" style="margin-top:18px;">
       Install: Safari → Share → Add to Home Screen · Offline works after first load.
     </div>
   </div>
