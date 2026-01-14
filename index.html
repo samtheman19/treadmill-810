@@ -1,155 +1,186 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>2 km 8:10 – Treadmill Routine</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>2 km 8:10 – Treadmill Routine</title>
 
-  <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#0b0b0f" />
+<style>
+* { box-sizing: border-box; }
 
-  <style>
-    :root {
-      --bg:#0b0b0f;
-      --card:#15151c;
-      --muted:#9aa0a6;
-      --accent:#6fd3ff;
-    }
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden;
+  background: #0b0b0f;
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
 
-    * { box-sizing: border-box; }
+/* App shell */
+.app {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 14px;
+}
 
-    html, body {
-      margin: 0;
-      padding: 0;
-      background: var(--bg);
-      color: #fff;
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui;
-      overflow-x: hidden;
-    }
+/* Cards */
+.card {
+  background: #15151c;
+  border-radius: 18px;
+  padding: 14px;
+  margin-bottom: 14px;
+  overflow-x: hidden;
+}
 
-    .app {
-      max-width: 420px;
-      margin: 0 auto;
-      padding: 14px;
-    }
+/* Buttons */
+button {
+  border: none;
+  border-radius: 14px;
+  padding: 10px 14px;
+  font-size: 15px;
+}
 
-    h1 {
-      font-size: 22px;
-      margin-bottom: 4px;
-    }
+.primary { background: #6fd3ff; color: #000; }
+.secondary { background: #23232c; color: #fff; }
 
-    .muted {
-      color: var(--muted);
-      font-size: 13px;
-    }
+/* Headers */
+h1, h2, h3 { margin: 0 0 8px; }
 
-    .card {
-      background: var(--card);
-      border-radius: 16px;
-      padding: 14px;
-      margin-bottom: 12px;
-      overflow-x: hidden;
-    }
+/* Workout header */
+.workoutHeader {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+}
 
-    button {
-      background: var(--accent);
-      color: #000;
-      border: none;
-      border-radius: 12px;
-      padding: 10px 14px;
-      font-weight: 600;
-    }
+/* Timer */
+.timer {
+  font-size: 36px;
+  font-weight: 700;
+}
 
-    button.secondary {
-      background: #222;
-      color: #fff;
-    }
+/* Checkbox row */
+.checkboxRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+}
 
-    input, select {
-      background: #111;
-      color: #fff;
-      border: none;
-      border-radius: 12px;
-      padding: 8px;
-      font-size: 14px;
-      max-width: 100%;
-    }
+/* Exercise nav */
+.exerciseNav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
 
-    /* ===== iPhone set row layout (NO horizontal scroll) ===== */
-    .setRowGrid {
-      display: grid;
-      grid-template-columns: 28px minmax(0,1fr) minmax(0,1fr) 36px;
-      gap: 8px;
-      align-items: center;
-      width: 100%;
-    }
+/* === SET ROW GRID (iPhone safe) === */
+.setRowGrid,
+.setRowGridHeader {
+  display: grid;
+  grid-template-columns: 34px minmax(0,1fr) minmax(0,1fr) 40px;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+}
 
-    .setRowGrid input {
-      width: 100%;
-      min-width: 0;
-      height: 34px;
-      padding: 6px 10px;
-      font-size: 14px;
-      border-radius: 12px;
-    }
+.setRowGrid input {
+  width: 100%;
+  min-width: 0;
+  height: 34px;
+  padding: 6px 8px;
+  font-size: 14px;
+  border-radius: 10px;
+  border: none;
+  background: #23232c;
+  color: #fff;
+}
 
-    .checkbox {
-      width: 20px;
-      height: 20px;
-    }
-  </style>
+.setRowGrid input[type="checkbox"] {
+  width: 22px;
+  height: 22px;
+}
+
+/* Interval grid */
+.intervalGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.muted {
+  color: #9aa0a6;
+  font-size: 13px;
+}
+</style>
 </head>
 
 <body>
-  <div class="app">
-    <h1>2 km 8:10 – Treadmill Routine</h1>
-    <div class="muted">
-      Incline 1.0% • Race pace 14.7 km/h • Saves on this device
-    </div>
+<div class="app">
 
-    <div class="card">
-      <strong>Workout</strong><br />
-      <div class="muted">Timer starts when you press Start</div>
-      <h2>00:00:00</h2>
-      <button>Start</button>
-      <button class="secondary">Pause</button>
-      <button class="secondary">End (save)</button>
-    </div>
+<h1>2 km 8:10 – Treadmill Routine</h1>
 
-    <div class="card">
-      <strong>Trap Bar Deadlift</strong>
-      <div class="muted">4 sets • target reps: 3</div>
+<div class="card workoutHeader">
+  <div>
+    <strong>Workout</strong><br>
+    <span class="muted">Today</span>
+  </div>
+  <button class="primary">Start</button>
+</div>
 
-      <div class="setRowGrid">
-        <div>#1</div>
-        <input placeholder="kg" />
-        <input placeholder="reps" />
-        <input type="checkbox" class="checkbox" />
-      </div>
+<div class="card">
+  <div class="timer">00:00:00</div>
+  <div class="checkboxRow">
+    <input type="checkbox" checked />
+    <span>Auto-start rest when set done</span>
+  </div>
+</div>
 
-      <div class="setRowGrid">
-        <div>#2</div>
-        <input placeholder="kg" />
-        <input placeholder="reps" />
-        <input type="checkbox" class="checkbox" />
-      </div>
+<div class="card">
+  <h3>Trap Bar Deadlift</h3>
+  <p class="muted">4 sets • target reps: 3</p>
 
-      <div class="setRowGrid">
-        <div>#3</div>
-        <input placeholder="kg" />
-        <input placeholder="reps" />
-        <input type="checkbox" class="checkbox" />
-      </div>
-
-      <div class="setRowGrid">
-        <div>#4</div>
-        <input placeholder="kg" />
-        <input placeholder="reps" />
-        <input type="checkbox" class="checkbox" />
-      </div>
-    </div>
+  <div class="setRowGridHeader muted">
+    <div>#</div><div>kg</div><div>reps</div><div>✓</div>
   </div>
 
-  <script src="app.js"></script>
+  <div class="setRowGrid">
+    <div>1</div><input placeholder="kg"><input value="3"><input type="checkbox">
+  </div>
+  <div class="setRowGrid">
+    <div>2</div><input placeholder="kg"><input value="3"><input type="checkbox">
+  </div>
+  <div class="setRowGrid">
+    <div>3</div><input placeholder="kg"><input value="3"><input type="checkbox">
+  </div>
+  <div class="setRowGrid">
+    <div>4</div><input placeholder="kg"><input value="3"><input type="checkbox">
+  </div>
+</div>
+
+<div class="card">
+  <h3>Interval Timer</h3>
+  <div class="timer">00:00</div>
+
+  <div class="intervalGrid">
+    <input value="95" placeholder="Work (sec)">
+    <input value="90" placeholder="Rest (sec)">
+  </div>
+
+  <div class="intervalGrid">
+    <input value="6" placeholder="Rounds">
+    <button class="primary">Start</button>
+  </div>
+</div>
+
+<p class="muted" style="text-align:center;">
+Safari → Share → Add to Home Screen
+</p>
+
+</div>
 </body>
 </html>
