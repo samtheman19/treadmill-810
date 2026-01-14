@@ -238,3 +238,41 @@ input, button, select { max-width: 100%; }
   <script src="app.js"></script>
 </body>
 </html>
+
+/* ===== iPhone: stop horizontal scroll + make kg/reps fit ===== */
+html, body { width: 100%; overflow-x: hidden; }
+* { box-sizing: border-box; }
+
+/* make cards never allow sideways overflow */
+.card, #sessionCard { overflow-x: hidden; }
+
+/* critical: allow grid children to shrink */
+.setRowGrid, .setRowGrid * { min-width: 0; }
+
+/* set rows: always fit on screen */
+.setRowGrid{
+  display: grid;
+  grid-template-columns: 34px minmax(0,1fr) minmax(0,1fr) 44px; /* Set | kg | reps | Done */
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+}
+
+/* compact inputs that can shrink */
+.setRowGrid input{
+  width: 100%;
+  min-width: 0;
+  height: 34px;
+  padding: 6px 10px;
+  font-size: 14px;
+  border-radius: 12px;
+}
+
+/* keep header aligned and not forcing width */
+.setRowGridHeader{
+  display: grid;
+  grid-template-columns: 34px minmax(0,1fr) minmax(0,1fr) 44px;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+}
