@@ -1,32 +1,21 @@
-/* 2 km 8:10 – Routine (Treadmill + Outdoor) – v10
-   - Toggle mode: treadmill/outdoor (stored)
-   - Run days show speeds (treadmill) OR pace+RPE (outdoor)
-   - Interval timer ONLY shows on Tue – Intervals
-   - Strength logging: kg + LWkg + reps + LWreps + rest countdown + tick
-   - NEW: Run Timer card appears ONLY on run days (start/pause/reset, saved)
+/* 2 km 8:10 – Routine (Treadmill + Outdoor mode)
+   - Mode dropdown: Treadmill / Outdoor
+   - Run instructions switch based on mode
+   - Interval timer ONLY on Intervals day
+   - Strength logging: kg + LWkg + reps + LWreps
+   - Per-set rest countdown starts when set ticked
+   - Mobility timers + tick
 */
 
-const STORAGE_KEY = "treadmill810_v10";
+const STORAGE_KEY = "treadmill810_v8";
 const TODAY_KEY = () => new Date().toISOString().slice(0, 10);
-
-// ---------- Pace anchors from your last 2k ----------
-const anchors = {
-  last2k: "8:36",
-  last2kPace: "4:18/km",
-  zonesOutdoor: {
-    easy: "5:15–5:45/km (RPE 3–4)",
-    steady: "4:45–5:00/km (RPE 5)",
-    tempo: "4:20–4:30/km (RPE 6–7)",
-    intervals: "3:55–4:10/km (RPE 8–9)"
-  }
-};
 
 // -------------------- Plan (FULL WEEK) --------------------
 const days = [
   {
     key: "mon",
     name: "Mon – Strength A",
-    warmup: ["3 min easy walk/jog", "Leg swings 10 each", "Ankle & calf mobility 60s"],
+    warmup: ["3 min easy walk or jog", "Leg swings 10 each direction", "Ankle & calf mobility 60 sec"],
     main: {
       type: "strength",
       exercises: [
@@ -43,37 +32,41 @@ const days = [
     ]
   },
 
+  // Intervals day (ONLY day that shows Interval Timer)
   {
     key: "tue",
     name: "Tue – Intervals",
-    warmup: ["Incline 1.0% (treadmill) / Flat route (outdoor)", "10–12 min easy", "3 × 20s strides"],
+    warmup: ["10–12 min easy", "3 × 20s strides"],
     main: {
       type: "run",
       title: "Intervals",
-      showIntervalTimer: true,
-      detailsTreadmill: [
-        "Incline: 1.0%",
-        "Rounds: 6",
-        "Work: 95s @ 15.0 km/h (4:00/km)",
-        "Recovery: 90s @ 10.0 km/h (6:00/km)",
-        "Goal: controlled hard reps"
-      ],
-      detailsOutdoor: [
-        `Easy warm-up pace: ${anchors.zonesOutdoor.easy}`,
-        "Rounds: 6",
-        `Work: 95s hard @ ${anchors.zonesOutdoor.intervals}`,
-        "Recovery: 90s easy jog/walk",
-        "Route: as flat as possible (avoid crossings if you can)"
-      ]
+      showIntervalTimer: true, // IMPORTANT
+      detailsByMode: {
+        treadmill: [
+          "Incline: 1.0%",
+          "Rounds: 6",
+          "Work: 95s @ 15.0 km/h (4:00/km)",
+          "Recovery: 90s @ 10.0 km/h (6:00/km)",
+          "Goal: controlled hard reps"
+        ],
+        outdoor: [
+          "Route: flat loop / track",
+          "Rounds: 6",
+          "Work: 95s @ hard-but-controlled (RPE 8/10)",
+          "Recovery: 90s easy jog/walk",
+          "Goal: even effort reps (don’t sprint the first 2)"
+        ]
+      }
     },
     mobility: [{ id: "calfStretch2", name: "Calf stretch", seconds: 60, note: "per side" }]
   },
 
+  // Mid-week easier day
   {
     key: "wed",
     name: "Wed – Mobility / Rest",
     warmup: [],
-    main: { type: "rest", details: ["Recovery day. Keep it easy.", "Optional 10 min walk"] },
+    main: { type: "rest", details: ["Recovery day. Keep it easy.", "Optional 10–20 min walk"] },
     mobility: [
       { id: "couch2", name: "Couch stretch", seconds: 60, note: "per side" },
       { id: "calves2", name: "Calves", seconds: 60, note: "per side" },
@@ -84,7 +77,7 @@ const days = [
   {
     key: "thu",
     name: "Thu – Strength B",
-    warmup: ["3 min easy walk/jog", "Hip openers 60s", "Ankle & calf mobility 60s"],
+    warmup: ["3 min easy walk or jog", "Hip openers 60 sec", "Ankle & calf mobility 60 sec"],
     main: {
       type: "strength",
       exercises: [
@@ -100,73 +93,81 @@ const days = [
     ]
   },
 
+  // Easy run day (NO interval timer)
   {
     key: "fri",
     name: "Fri – Easy Run",
-    warmup: ["Incline 1.0% (treadmill) / Easy jog (outdoor)", "3–5 min easy"],
+    warmup: ["8–10 min easy", "2 × 15s relaxed strides (optional)"],
     main: {
       type: "run",
       title: "Easy Run",
       showIntervalTimer: false,
-      detailsTreadmill: [
-        "Incline: 1.0%",
-        "20–30 min easy",
-        "Speed: 10.0–12.0 km/h (6:00–5:00/km)",
-        "Stay relaxed"
-      ],
-      detailsOutdoor: [
-        "20–35 min easy",
-        `Target: ${anchors.zonesOutdoor.easy}`,
-        "Talk test: full sentences"
-      ]
+      detailsByMode: {
+        treadmill: [
+          "Incline: 1.0%",
+          "20–30 min easy",
+          "Speed: 10.0–12.0 km/h (6:00–5:00/km)",
+          "Finish feeling fresh"
+        ],
+        outdoor: [
+          "20–30 min easy",
+          "Talk-test pace (RPE 4–5/10)",
+          "Avoid big hills if possible",
+          "Finish feeling fresh"
+        ]
+      }
     },
     mobility: [{ id: "calfStretch3", name: "Calf stretch", seconds: 60, note: "per side" }]
   },
 
+  // Tempo day (NO interval timer)
   {
     key: "sat",
     name: "Sat – Tempo / Steady",
-    warmup: ["Incline 1.0% (treadmill) / Easy jog (outdoor)", "5–10 min easy"],
+    warmup: ["10 min easy", "3 × 20s strides"],
     main: {
       type: "run",
       title: "Tempo / Steady",
       showIntervalTimer: false,
-      detailsTreadmill: [
-        "Incline: 1.0%",
-        "10 min easy @ 11.0–12.0 km/h",
-        "10–15 min steady @ 13.0–14.0 km/h",
-        "5 min easy cool down"
-      ],
-      detailsOutdoor: [
-        "10 min easy",
-        `12–20 min steady/tempo @ ${anchors.zonesOutdoor.tempo}`,
-        "5–10 min easy cool down",
-        "Effort: comfortably hard (RPE 6–7)"
-      ]
+      detailsByMode: {
+        treadmill: [
+          "Incline: 1.0%",
+          "10 min easy @ 11.0–12.0 km/h",
+          "10–15 min steady @ 13.0–14.0 km/h",
+          "5 min easy cool down"
+        ],
+        outdoor: [
+          "10 min easy",
+          "10–15 min steady (RPE 7/10, ‘comfortably hard’)",
+          "5–10 min cool down",
+          "Aim even effort not exact pace"
+        ]
+      }
     },
     mobility: [{ id: "glutes2", name: "Glute stretch", seconds: 60, note: "per side" }]
   },
 
+  // Long run day (NO interval timer)
   {
     key: "sun",
     name: "Sun – Long Run",
-    warmup: ["Easy start (first 5–10 min very relaxed)"],
+    warmup: ["5–10 min easy build"],
     main: {
       type: "run",
       title: "Long Run",
       showIntervalTimer: false,
-      detailsTreadmill: [
-        "Incline: 1.0%",
-        "40–60 min easy (build up weekly)",
-        "Speed: 10.0–11.5 km/h",
-        "Optional: last 10 min steady @ 12.5–13.0 km/h"
-      ],
-      detailsOutdoor: [
-        "40–70 min easy (build up weekly)",
-        `Target: ${anchors.zonesOutdoor.easy}`,
-        "Optional: last 10–15 min steady @ ~5:00/km (RPE 5) if feeling good",
-        "Pick a simple route (avoid loads of stop/start)"
-      ]
+      detailsByMode: {
+        treadmill: [
+          "Incline: 1.0%",
+          "35–50 min easy (build by +5 min every 1–2 weeks)",
+          "Keep it conversational (RPE 4–5/10)"
+        ],
+        outdoor: [
+          "35–50 min easy (build by +5 min every 1–2 weeks)",
+          "Conversational pace (RPE 4–5/10)",
+          "Prefer flatter route; take water if needed"
+        ]
+      }
     },
     mobility: [{ id: "fullbody", name: "Full body stretch", seconds: 180, note: "easy" }]
   }
@@ -175,10 +176,9 @@ const days = [
 // -------------------- State --------------------
 const defaultState = {
   dayKey: "mon",
-  mode: "treadmill",            // treadmill | outdoor
+  mode: "treadmill", // NEW
   restSeconds: 90,
   session: { running: false, startedAt: null, elapsedMs: 0, lastSaved: null },
-  runTimer: { running: false, startedAt: null, elapsedMs: 0, lastSaved: null }, // NEW
   logs: {},
   mobility: {}
 };
@@ -220,6 +220,7 @@ function currentWeekNumber() {
   return Math.max(1, Math.floor(diffDays / 7) + 1);
 }
 function getWeekKey() { return String(currentWeekNumber()); }
+
 function ensurePath(obj, pathArr, fallback) {
   let ref = obj;
   for (let i = 0; i < pathArr.length; i++) {
@@ -229,16 +230,10 @@ function ensurePath(obj, pathArr, fallback) {
   }
   return ref;
 }
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, m => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"
-  })[m]);
-}
-function escapeAttr(s) { return escapeHtml(s).replace(/"/g, "&quot;"); }
 
 // -------------------- DOM --------------------
-const modeSelect = document.getElementById("modeSelect");
 const daySelect = document.getElementById("daySelect");
+const modeSelect = document.getElementById("modeSelect"); // NEW
 const resetDayBtn = document.getElementById("resetDayBtn");
 const resetWeekBtn = document.getElementById("resetWeekBtn");
 
@@ -258,22 +253,14 @@ function init() {
   daySelect.innerHTML = days.map(d => `<option value="${d.key}">${d.name}</option>`).join("");
   daySelect.value = state.dayKey;
 
-  if (modeSelect) {
-    modeSelect.value = state.mode || "treadmill";
-    modeSelect.onchange = () => {
-      state.mode = modeSelect.value;
-      saveState();
-      renderDay();
-      attachHandlers();
-    };
-  }
+  if (modeSelect) modeSelect.value = state.mode || "treadmill";
 
   render();
   startTick();
 }
 init();
 
-// -------------------- Workout Timer --------------------
+// -------------------- Session Timer --------------------
 function sessionNowElapsedMs() {
   if (!state.session.running || !state.session.startedAt) return state.session.elapsedMs || 0;
   return (state.session.elapsedMs || 0) + (Date.now() - state.session.startedAt);
@@ -302,41 +289,11 @@ function sessionEndSave() {
   renderSession();
 }
 
-// -------------------- Run Timer (NEW) --------------------
-function runNowElapsedMs() {
-  if (!state.runTimer.running || !state.runTimer.startedAt) return state.runTimer.elapsedMs || 0;
-  return (state.runTimer.elapsedMs || 0) + (Date.now() - state.runTimer.startedAt);
-}
-function runStart() {
-  if (state.runTimer.running) return;
-  state.runTimer.running = true;
-  state.runTimer.startedAt = Date.now();
-  saveState();
-  renderRunTimerOnly();
-}
-function runPause() {
-  if (!state.runTimer.running) return;
-  state.runTimer.elapsedMs = runNowElapsedMs();
-  state.runTimer.running = false;
-  state.runTimer.startedAt = null;
-  saveState();
-  renderRunTimerOnly();
-}
-function runReset() {
-  state.runTimer.running = false;
-  state.runTimer.startedAt = null;
-  state.runTimer.elapsedMs = 0;
-  state.runTimer.lastSaved = { date: TODAY_KEY(), elapsedMs: 0 };
-  saveState();
-  renderRunTimerOnly();
-}
-
 // -------------------- Strength logging --------------------
 function getLogRef(weekKey, dayKey, exId) {
   const week = ensurePath(state.logs, [weekKey], {});
   const day = ensurePath(week, [dayKey], {});
-  const ex = ensurePath(day, [exId], {});
-  return ex;
+  return ensurePath(day, [exId], {});
 }
 function getLastWeekValue(dayKey, exId, setIdx, field) {
   const wk = Number(getWeekKey());
@@ -356,8 +313,9 @@ function setDoneAndStartRest(dayKey, exId, setIdx, done) {
   const wk = getWeekKey();
   const ex = getLogRef(wk, dayKey, exId);
   const row = ensurePath(ex, [String(setIdx)], { kg: "", reps: "", done: false, restEndsAtMs: null });
+
   row.done = done;
-  row.restEndsAtMs = done ? (Date.now() + (Number(state.restSeconds) * 1000)) : null;
+  row.restEndsAtMs = done ? Date.now() + (Number(state.restSeconds) * 1000) : null;
   saveState();
 }
 
@@ -393,50 +351,6 @@ function renderSession() {
   sessionStartBtn.disabled = state.session.running;
 }
 
-function runDetailsForMode(day) {
-  const m = state.mode || "treadmill";
-  return (m === "outdoor") ? (day.main.detailsOutdoor || []) : (day.main.detailsTreadmill || []);
-}
-
-function renderRunTimerCard() {
-  const day = dayByKey(state.dayKey);
-  if (day.main.type !== "run") return "";
-
-  const elapsed = runNowElapsedMs();
-  const btnLabel = state.runTimer.running ? "Running" : "Start";
-
-  return `
-    <div class="card" style="margin:12px 0 0;">
-      <div class="row">
-        <div>
-          <div class="cardTitle">Run Timer</div>
-          <div class="muted">Separate from Workout timer · ${day.main.title || "Run day"}</div>
-        </div>
-        <div class="spacer"></div>
-        <button class="btn btnPrimary" id="runStartBtn" ${state.runTimer.running ? "disabled" : ""}>${btnLabel}</button>
-      </div>
-
-      <div class="bigTime" id="runTime" style="font-size:44px;">${formatHMS(elapsed)}</div>
-
-      <div class="row">
-        <button class="btn" id="runPauseBtn">Pause</button>
-        <button class="btn" id="runResetBtn">Reset</button>
-      </div>
-    </div>
-  `;
-}
-
-function renderRunTimerOnly() {
-  const el = document.getElementById("runTime");
-  if (el) el.textContent = formatHMS(runNowElapsedMs());
-
-  const startBtn = document.getElementById("runStartBtn");
-  if (startBtn) {
-    startBtn.textContent = state.runTimer.running ? "Running" : "Start";
-    startBtn.disabled = !!state.runTimer.running;
-  }
-}
-
 function renderDay() {
   const day = dayByKey(state.dayKey);
   dayTitleEl.textContent = day.name;
@@ -444,30 +358,30 @@ function renderDay() {
   warmupList.innerHTML =
     (day.warmup || []).map(x => `<li>${escapeHtml(x)}</li>`).join("") || `<li class="muted">—</li>`;
 
+  // Main
   if (day.main.type === "strength") {
     mainBlock.innerHTML = `
       ${(day.main.exercises || []).map(ex => renderExercise(day.key, ex)).join("")}
       ${renderRestSettings()}
     `;
   } else if (day.main.type === "run") {
-    const details = runDetailsForMode(day);
-    const showTimer = !!day.main.showIntervalTimer; // ONLY Tue
+    const mode = state.mode || "treadmill";
+    const details = (day.main.detailsByMode && day.main.detailsByMode[mode]) || day.main.details || [];
 
     mainBlock.innerHTML = `
       <div class="cardTitle">${escapeHtml(day.main.title || "Run")}</div>
-      <div class="tiny" style="margin-bottom:6px;color:var(--muted);">
-        Mode: <b>${state.mode === "outdoor" ? "Outdoor" : "Treadmill"}</b> · Last 2k: ${anchors.last2k} (${anchors.last2kPace})
-      </div>
+      <div class="muted">Mode: <b>${mode === "treadmill" ? "Treadmill" : "Outdoor"}</b></div>
       <ul>${details.map(x => `<li>${escapeHtml(x)}</li>`).join("")}</ul>
-
-      ${renderRunTimerCard()}
-
-      ${showTimer ? `
-        <div class="hr"></div>
-        <div class="cardTitle">Interval Timer</div>
-        <div class="muted">Use for work/recovery on intervals.</div>
-        ${renderIntervalTimer()}
-      ` : ``}
+      ${
+        day.main.showIntervalTimer
+          ? `
+            <div class="hr"></div>
+            <div class="cardTitle">Interval Timer</div>
+            <div class="muted">Use for work/rest intervals</div>
+            ${renderIntervalTimer()}
+          `
+          : ``
+      }
     `;
   } else {
     mainBlock.innerHTML = `
@@ -476,6 +390,7 @@ function renderDay() {
     `;
   }
 
+  // Mobility
   mobilityList.innerHTML =
     (day.mobility || []).map(m => renderMobItem(day.key, m)).join("") || `<div class="muted">—</div>`;
 }
@@ -513,9 +428,7 @@ function renderExercise(dayKey, ex) {
         <div class="restBox" data-restbox="${ex.id}|${setIdx}" title="Rest countdown">${restLabel}</div>
 
         <div class="doneWrap">
-          <input class="done" type="checkbox"
-            ${row.done ? "checked" : ""}
-            data-done="${ex.id}|${setIdx}" />
+          <input class="done" type="checkbox" ${row.done ? "checked" : ""} data-done="${ex.id}|${setIdx}" />
         </div>
       </div>
     `;
@@ -525,6 +438,7 @@ function renderExercise(dayKey, ex) {
     <div style="margin:10px 0 18px;">
       <div class="exTitle">${escapeHtml(ex.name)}</div>
       <div class="exMeta">${ex.sets} sets · target reps ${ex.targetReps}${ex.note ? ` · ${escapeHtml(ex.note)}` : ""}</div>
+
       <div class="tableHead">
         <div>#</div><div>kg</div><div>LW</div><div>reps</div><div>LW</div><div>⏱</div><div>✓</div>
       </div>
@@ -582,7 +496,7 @@ function renderIntervalTimer() {
       <div class="hr"></div>
       <div class="row">
         <input id="itWork" type="number" min="5" value="95" style="width:100%;" placeholder="Work (sec)" />
-        <input id="itRest" type="number" min="5" value="90" style="width:100%;" placeholder="Recovery (sec)" />
+        <input id="itRest" type="number" min="5" value="90" style="width:100%;" placeholder="Rest (sec)" />
       </div>
       <div class="row" style="margin-top:10px;">
         <input id="itRounds" type="number" min="1" value="6" style="width:100%;" placeholder="Rounds" />
@@ -609,6 +523,14 @@ function attachHandlers() {
     render();
   };
 
+  if (modeSelect) {
+    modeSelect.onchange = () => {
+      state.mode = modeSelect.value;
+      saveState();
+      render();
+    };
+  }
+
   resetDayBtn.onclick = () => {
     const wk = getWeekKey();
     if (state.logs[wk] && state.logs[wk][state.dayKey]) delete state.logs[wk][state.dayKey];
@@ -624,40 +546,30 @@ function attachHandlers() {
     render();
   };
 
-  // workout timer buttons
   sessionStartBtn.onclick = sessionStart;
   sessionPauseBtn.onclick = sessionPause;
   sessionEndBtn.onclick = sessionEndSave;
 
-  // run timer buttons (only exist on run days)
-  const runStartBtn = document.getElementById("runStartBtn");
-  const runPauseBtn = document.getElementById("runPauseBtn");
-  const runResetBtn = document.getElementById("runResetBtn");
-  if (runStartBtn) runStartBtn.onclick = runStart;
-  if (runPauseBtn) runPauseBtn.onclick = runPause;
-  if (runResetBtn) runResetBtn.onclick = runReset;
-
-  // rest seconds input exists only on strength days (re-rendered)
-  const restSecondsInput = document.getElementById("restSeconds");
-
+  // Rest buttons / input (inside rest settings)
   document.querySelectorAll("[data-rest]").forEach(btn => {
     btn.onclick = () => {
       state.restSeconds = Number(btn.getAttribute("data-rest")) || 90;
-      if (restSecondsInput) restSecondsInput.value = state.restSeconds;
       saveState();
+      render(); // refresh input value
     };
   });
 
+  const restSecondsInput = document.getElementById("restSeconds");
   if (restSecondsInput) {
     restSecondsInput.onchange = () => {
       const v = Number(restSecondsInput.value || 90);
       state.restSeconds = Math.min(600, Math.max(10, v));
-      restSecondsInput.value = state.restSeconds;
       saveState();
+      render();
     };
   }
 
-  // strength inputs
+  // Strength inputs
   document.querySelectorAll("[data-kg]").forEach(inp => {
     inp.oninput = () => {
       const [exId, setIdx] = inp.getAttribute("data-kg").split("|");
@@ -672,6 +584,7 @@ function attachHandlers() {
     };
   });
 
+  // Done tick -> starts rest countdown
   document.querySelectorAll("[data-done]").forEach(chk => {
     chk.onchange = () => {
       const [exId, setIdx] = chk.getAttribute("data-done").split("|");
@@ -681,7 +594,7 @@ function attachHandlers() {
     };
   });
 
-  // mobility
+  // Mobility
   document.querySelectorAll("[data-mobstart]").forEach(btn => {
     btn.onclick = () => {
       const mobId = btn.getAttribute("data-mobstart");
@@ -703,7 +616,7 @@ function attachHandlers() {
     };
   });
 
-  // interval timer only if present (only Tue renders it)
+  // Interval timer only if present
   const itTime = document.getElementById("itTime");
   if (itTime) setupIntervalTimer();
 }
@@ -712,19 +625,15 @@ function attachHandlers() {
 let tickTimer = null;
 function startTick() {
   if (tickTimer) clearInterval(tickTimer);
-  tickTimer = setInterval(() => {
-    // workout timer live update
-    sessionTimeEl.textContent = formatHMS(sessionNowElapsedMs());
 
-    // run timer live update (only if element exists)
-    const rt = document.getElementById("runTime");
-    if (rt) rt.textContent = formatHMS(runNowElapsedMs());
+  tickTimer = setInterval(() => {
+    sessionTimeEl.textContent = formatHMS(sessionNowElapsedMs());
 
     const wk = getWeekKey();
     const dayKey = state.dayKey;
     const day = dayByKey(dayKey);
 
-    // per-set rest boxes
+    // Update strength rest boxes
     if (day.main.type === "strength") {
       (day.main.exercises || []).forEach(ex => {
         const exLog = (((state.logs || {})[wk] || {})[dayKey] || {})[ex.id] || {};
@@ -742,14 +651,12 @@ function startTick() {
               el.textContent = "—";
               beep();
             }
-          } else {
-            el.textContent = "—";
           }
         }
       });
     }
 
-    // mobility countdown finish
+    // Finish mobility timers
     (day.mobility || []).forEach(m => {
       const mob = getMob(dayKey, m.id);
       if (mob.running && mob.endsAtMs) {
@@ -767,7 +674,7 @@ function startTick() {
   }, 250);
 }
 
-// -------------------- Interval Timer (ONLY Tue) --------------------
+// -------------------- Interval Timer --------------------
 function setupIntervalTimer() {
   const itTime = document.getElementById("itTime");
   const itStart = document.getElementById("itStart");
@@ -800,7 +707,8 @@ function setupIntervalTimer() {
       else {
         phase = "work";
         round += 1;
-        if (round > Number(itRounds.value || 6)) { running = false; return; }
+        const totalRounds = Number(itRounds.value || 6);
+        if (round > totalRounds) { running = false; return; }
       }
       startPhase();
     }
@@ -825,3 +733,9 @@ function beep() {
     o.stop(ctx.currentTime + 0.15);
   } catch {}
 }
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, m => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"
+  })[m]);
+}
+function escapeAttr(s) { return escapeHtml(s).replace(/"/g, "&quot;"); }
