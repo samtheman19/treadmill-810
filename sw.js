@@ -1,37 +1,42 @@
-const CACHE_NAME = "treadmill810-final-v6";
-const OFFLINE_URL = "./";
+const CACHE_NAME = "treadmill-810-v6"; // ⬅️ increment this when UI changes
+const FILES_TO_CACHE = [
+  "./",
+  "./index.html",
+  "./app.js",
+  "./manifest.json"
+];
 
-self.addEventListener("install", event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll([
-        "./",
-        "./index.html",
-        "./app.js",
-        "./manifest.json"
-      ]);
+// Install
+self.addEventListener("install", (e) => {
+  self.skipWaiting();
+  e.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(FILES_TO_CACHE);
     })
   );
-  self.skipWaiting();
 });
 
-self.addEventListener("activate", event => {
-  event.waitUntil(
-    caches.keys().then(keys =>
+// Activate – clean old caches
+self.addEventListener("activate", (e) => {
+  e.waitUntil(
+    caches.keys().then((keys) =>
       Promise.all(
-        keys
-          .filter(key => key !== CACHE_NAME)
-          .map(key => caches.delete(key))
+        keys.map((key) => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
+        })
       )
     )
   );
   self.clients.claim();
 });
 
-self.addEventListener("fetch", event => {
-  event.respondWith(
-    caches.match(event.request).then(response => {
-      return response || fetch(event.request);
+// Fetch
+self.addEventListener("fetch", (e) => {
+  e.respondWith(
+    caches.match(e.request).then((res) => {
+      return res || fetch(e.request);
     })
   );
 });
