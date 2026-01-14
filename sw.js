@@ -1,5 +1,5 @@
 /* Service Worker – forces Home Screen updates cleanly */
-const CACHE = "treadmill810-cache-v10";
+const CACHE = "treadmill810-cache-v8";
 
 const ASSETS = [
   "./",
