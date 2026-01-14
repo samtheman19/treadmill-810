@@ -1,42 +1,38 @@
-const CACHE_NAME = "treadmill-810-v6"; // ⬅️ increment this when UI changes
-const FILES_TO_CACHE = [
+/* Service Worker – cache version bump so updates show on Home Screen */
+const CACHE = "treadmill810-cache-v6";
+const ASSETS = [
   "./",
   "./index.html",
   "./app.js",
   "./manifest.json"
 ];
 
-// Install
-self.addEventListener("install", (e) => {
-  self.skipWaiting();
-  e.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(FILES_TO_CACHE);
-    })
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches.open(CACHE).then((cache) => cache.addAll(ASSETS)).then(() => self.skipWaiting())
   );
 });
 
-// Activate – clean old caches
-self.addEventListener("activate", (e) => {
-  e.waitUntil(
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
-          }
-        })
-      )
-    )
+      Promise.all(keys.map((k) => (k !== CACHE ? caches.delete(k) : null)))
+    ).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
-// Fetch
-self.addEventListener("fetch", (e) => {
-  e.respondWith(
-    caches.match(e.request).then((res) => {
-      return res || fetch(e.request);
+self.addEventListener("fetch", (event) => {
+  const req = event.request;
+  event.respondWith(
+    caches.match(req).then((cached) => {
+      return cached || fetch(req).then((res) => {
+        // Cache new GET requests
+        if (req.method === "GET" && res.ok) {
+          const copy = res.clone();
+          caches.open(CACHE).then((cache) => cache.put(req, copy)).catch(()=>{});
+        }
+        return res;
+      }).catch(() => cached);
     })
   );
 });
