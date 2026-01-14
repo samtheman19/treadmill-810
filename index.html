@@ -1,4 +1,29 @@
-<!doctype html>
+/* --- phone fit fixes --- */
+* { box-sizing: border-box; }
+body { overflow-x: hidden; }
+#sessionCard, .card { overflow-x: hidden; }
+
+/* inputs must be allowed to shrink inside grids */
+input, button, select { max-width: 100%; }
+.setRowGrid > * { min-width: 0; }
+
+/* make the set rows always fit on iPhone width */
+.setRowGrid {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) minmax(0, 1fr) 40px;
+  gap: 8px;
+  align-items: center;
+}
+
+/* keep inputs compact */
+.setRowGrid input {
+  width: 100%;
+  min-width: 0;
+  height: 34px;
+  padding: 6px 10px;
+  border-radius: 12px;
+  font-size: 14px;
+}<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
