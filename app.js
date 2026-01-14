@@ -1,12 +1,13 @@
-/* treadmill-810 app.js (compact clean iPhone layout)
+/* treadmill-810 app.js (ONE-EXERCISE VIEW + compact)
    - Workout duration timer + streak
-   - Strength: per-set kg + reps (pre-filled) + done + last week shown in placeholders
-   - Rest timer + auto-start when set done (toggle)
+   - Strength: per-set kg + reps + done (last week in placeholders)
+   - One exercise shown at a time (Prev/Next)
+   - Rest timer pinned + auto-start when set done
    - Runs: detailed intervals + speeds (km/h + min/km pace)
    - Interval timer engine (work/rest/rounds)
 */
 
-const STORAGE_KEY = "treadmill810.compact.v1";
+const STORAGE_KEY = "treadmill810.oneExercise.v1";
 
 /* ---------- Helpers ---------- */
 const pad2 = (n) => String(n).padStart(2, "0");
@@ -147,7 +148,8 @@ function loadState(){
         restDefaultSec:90,
         strengthLogs:{},
         workoutSessions:{},
-        completedDates:[]
+        completedDates:[],
+        exerciseIndex:{ mon:0, fri:0 } // NEW: remembers which exercise you’re on
       };
     }
     const s = JSON.parse(raw);
@@ -158,7 +160,8 @@ function loadState(){
       restDefaultSec: clampInt(s.restDefaultSec ?? 90, 10, 600),
       strengthLogs: s.strengthLogs || {},
       workoutSessions: s.workoutSessions || {},
-      completedDates: Array.isArray(s.completedDates) ? s.completedDates : []
+      completedDates: Array.isArray(s.completedDates) ? s.completedDates : [],
+      exerciseIndex: s.exerciseIndex || { mon:0, fri:0 }
     };
   }catch{
     return {
@@ -168,7 +171,8 @@ function loadState(){
       restDefaultSec:90,
       strengthLogs:{},
       workoutSessions:{},
-      completedDates:[]
+      completedDates:[],
+      exerciseIndex:{ mon:0, fri:0 }
     };
   }
 }
@@ -347,7 +351,7 @@ function getPrevSetLog(prevWeek, dayKey, exId, setIdx){
 let interval = {
   running:false,
   paused:false,
-  phase:"work", // work | rest
+  phase:"work",
   round:1,
   left:0,
   id:null
@@ -360,7 +364,6 @@ function intervalRender(){
     ? `${interval.phase.toUpperCase()} • Round ${interval.round}`
     : "Ready";
 }
-
 function intervalStop(){
   if(interval.id) clearInterval(interval.id);
   interval.id = null;
@@ -371,7 +374,6 @@ function intervalStop(){
   interval.left = 0;
   intervalRender();
 }
-
 function intervalPause(){
   if(!interval.running) return;
   interval.paused = !interval.paused;
@@ -379,52 +381,34 @@ function intervalPause(){
     if(interval.id) clearInterval(interval.id);
     interval.id = null;
   }else{
-    intervalTick();
+    // resume
+    intervalStartResume();
   }
 }
-
-function intervalStart(){
-  const work = clampInt(workSecEl.value, 5, 3600);
-  const rest = clampInt(restSecEl.value, 0, 3600);
-  const rounds = clampInt(roundsEl.value, 1, 99);
-  const auto = (autoSwitchEl?.value || "on") === "on";
-
-  // fresh start
-  intervalStop();
-  interval.running = true;
-  interval.phase = "work";
-  interval.round = 1;
-  interval.left = work;
-
-  intervalRender();
+function intervalStartResume(){
+  if(interval.id) clearInterval(interval.id);
   interval.id = setInterval(() => {
     if(!interval.running) return;
     interval.left -= 1;
     intervalRender();
-
     if(interval.left <= 0){
       beep(); haptic();
+      const work = clampInt(workSecEl.value, 5, 3600);
+      const rest = clampInt(restSecEl.value, 0, 3600);
+      const rounds = clampInt(roundsEl.value, 1, 99);
+      const auto = (autoSwitchEl?.value || "on") === "on";
 
       if(!auto){
-        // stay at 00:00 until user presses start again
         interval.running = false;
         if(interval.id) clearInterval(interval.id);
         interval.id = null;
         intervalRender();
         return;
       }
-
-      // auto switch
       if(interval.phase === "work"){
         interval.phase = "rest";
         interval.left = rest;
-        intervalRender();
-        if(rest === 0){
-          // instant jump
-          interval.left = 0;
-        }
       }else{
-        // finished rest -> next round
         interval.round += 1;
         if(interval.round > rounds){
           intervalStop();
@@ -432,10 +416,20 @@ function intervalStart(){
         }
         interval.phase = "work";
         interval.left = work;
-        intervalRender();
       }
+      intervalRender();
     }
   }, 1000);
+}
+function intervalStart(){
+  const work = clampInt(workSecEl.value, 5, 3600);
+  intervalStop();
+  interval.running = true;
+  interval.phase = "work";
+  interval.round = 1;
+  interval.left = work;
+  intervalRender();
+  intervalStartResume();
 }
 
 function setIntervalPreset(preset){
@@ -493,8 +487,7 @@ function render(){
 
   let body = "";
   if(meta.type === "strength"){
-    body = renderStrength(meta.key);
-    // don’t overwrite interval values on strength day
+    body = renderStrengthOne(meta.key);
   }else if(meta.type === "run"){
     body = renderRun(meta.key);
   }else{
@@ -527,70 +520,50 @@ function render(){
 
   pumpWorkoutTimer(dateK);
 
-  // bind rest timer controls if present
+  // strength bindings
   if(meta.type === "strength"){
     document.getElementById("rt60").onclick = () => restSet(60);
     document.getElementById("rt90").onclick = () => restSet(90);
     document.getElementById("rt120").onclick = () => restSet(120);
+
     const custom = document.getElementById("rtCustom");
     custom.value = state.restDefaultSec || 90;
     custom.oninput = () => restSet(clampInt(custom.value, 10, 600));
+
     document.getElementById("rtStart").onclick = () => restStart();
     document.getElementById("rtPause").onclick = () => restPause();
     document.getElementById("rtReset").onclick = () => restReset();
     restReset();
 
-    bindStrengthInputs(meta.key);
+    bindStrengthOne(meta.key);
   }
 }
 
-function renderStrength(dayKey){
+/* ---------- Strength ONE exercise view ---------- */
+function renderStrengthOne(dayKey){
   const plan = STRENGTH[dayKey];
   const week = state.week;
   const prevWeek = week - 1;
 
-  const exBlocks = plan.exercises.map(ex => {
-    const rows = Array.from({length: ex.sets}).map((_, sIdx) => {
-      const cur = getSetLog(week, dayKey, ex.id, sIdx, ex.targetReps);
-      const prev = getPrevSetLog(prevWeek, dayKey, ex.id, sIdx);
+  const exList = plan.exercises;
+  state.exerciseIndex[dayKey] = clampInt(state.exerciseIndex?.[dayKey] ?? 0, 0, exList.length - 1);
+  const idx = state.exerciseIndex[dayKey];
+  const ex = exList[idx];
 
-      const prevKg = prev?.kg ? `${prev.kg}kg` : "—";
-      const prevReps = prev?.reps ? `${prev.reps}` : "—";
-
-      return `
-        <div class="setRowGrid">
-          <div class="muted">#${sIdx+1}</div>
-
-          <input id="kg_${ex.id}_${sIdx}" inputmode="decimal"
-            placeholder="kg (lw ${esc(prevKg)})" value="${esc(cur.kg)}" style="text-align:right" />
-
-          <input id="reps_${ex.id}_${sIdx}" inputmode="numeric"
-            placeholder="${esc(ex.targetReps)} (lw ${esc(prevReps)})" value="${esc(cur.reps)}" style="text-align:right" />
-
-          <div style="text-align:right">
-            <input id="done_${ex.id}_${sIdx}" type="checkbox" ${cur.done ? "checked":""} />
-          </div>
-        </div>
-      `;
-    }).join("");
+  const rows = Array.from({length: ex.sets}).map((_, sIdx) => {
+    const cur = getSetLog(week, dayKey, ex.id, sIdx, ex.targetReps);
+    const prev = getPrevSetLog(prevWeek, dayKey, ex.id, sIdx);
+    const prevKg = prev?.kg ? `${prev.kg}kg` : "—";
+    const prevReps = prev?.reps ? `${prev.reps}` : "—";
 
     return `
-      <div class="exCard" style="border:1px solid #25262b;border-radius:16px;padding:12px;margin-top:12px">
-        <div class="exHeader">
-          <div style="font-weight:900;font-size:15px">${esc(ex.name)}</div>
-          <div class="muted">${esc(ex.sets)} sets • target reps: ${esc(ex.targetReps)} • ${esc(ex.note)}</div>
+      <div class="setRowGrid" style="display:grid;grid-template-columns:34px 1fr 1fr 44px;gap:8px;align-items:center;margin-top:6px">
+        <div class="muted">#${sIdx+1}</div>
+        <input id="kg_${ex.id}_${sIdx}" inputmode="decimal" placeholder="kg (lw ${esc(prevKg)})" value="${esc(cur.kg)}" style="text-align:right;height:34px;padding:6px 10px;border-radius:12px" />
+        <input id="reps_${ex.id}_${sIdx}" inputmode="numeric" placeholder="${esc(ex.targetReps)} (lw ${esc(prevReps)})" value="${esc(cur.reps)}" style="text-align:right;height:34px;padding:6px 10px;border-radius:12px" />
+        <div style="text-align:right">
+          <input id="done_${ex.id}_${sIdx}" type="checkbox" ${cur.done ? "checked":""} style="width:18px;height:18px" />
         </div>
-
-        <div class="hr"></div>
-
-        <div class="setHeaderGrid muted">
-          <div><strong>Set</strong></div>
-          <div style="text-align:right"><strong>kg</strong></div>
-          <div style="text-align:right"><strong>reps</strong></div>
-          <div style="text-align:right"><strong>Done</strong></div>
-        </div>
-
-        ${rows}
       </div>
     `;
   }).join("");
@@ -599,24 +572,45 @@ function renderStrength(dayKey){
     <div class="title">
       <div>
         <strong>${esc(plan.title)}</strong>
-        <div class="muted">kg + reps (pre-filled) per set. Tick done to track.</div>
+        <div class="muted">One exercise view • swipe less • faster to log</div>
       </div>
     </div>
 
-    <details open>
+    <details>
       <summary class="muted">Warm-up</summary>
       <ul class="muted">${plan.warmup.map(i => `<li>${esc(i)}</li>`).join("")}</ul>
     </details>
 
     <div class="hr"></div>
 
-    <div class="muted"><strong>Main</strong></div>
-    ${exBlocks}
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+      <div class="muted"><strong>Main</strong> • Exercise ${idx+1}/${exList.length}</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button id="prevEx" type="button">◀ Prev</button>
+        <button id="nextEx" class="primary" type="button">Next ▶</button>
+      </div>
+    </div>
+
+    <div style="border:1px solid #25262b;border-radius:16px;padding:12px;margin-top:12px">
+      <div style="font-weight:900;font-size:16px">${esc(ex.name)}</div>
+      <div class="muted">${esc(ex.sets)} sets • target reps: ${esc(ex.targetReps)} • ${esc(ex.note)}</div>
+
+      <div class="hr"></div>
+
+      <div class="muted" style="display:grid;grid-template-columns:34px 1fr 1fr 44px;gap:8px">
+        <div><strong>Set</strong></div>
+        <div style="text-align:right"><strong>kg</strong></div>
+        <div style="text-align:right"><strong>reps</strong></div>
+        <div style="text-align:right"><strong>Done</strong></div>
+      </div>
+
+      ${rows}
+    </div>
 
     <div class="hr"></div>
 
     <div class="muted"><strong>Rest timer</strong></div>
-    <div id="restControls" style="margin-top:10px">
+    <div style="margin-top:10px">
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
         <button id="rt60" type="button">60s</button>
         <button id="rt90" type="button">90s</button>
@@ -647,34 +641,47 @@ function renderStrength(dayKey){
   `;
 }
 
-function bindStrengthInputs(dayKey){
+function bindStrengthOne(dayKey){
   const plan = STRENGTH[dayKey];
   const week = state.week;
 
-  plan.exercises.forEach(ex => {
-    for(let sIdx=0; sIdx<ex.sets; sIdx++){
-      const kgEl = document.getElementById(`kg_${ex.id}_${sIdx}`);
-      const repsEl = document.getElementById(`reps_${ex.id}_${sIdx}`);
-      const doneEl = document.getElementById(`done_${ex.id}_${sIdx}`);
+  // nav buttons
+  const exList = plan.exercises;
+  const idx = clampInt(state.exerciseIndex?.[dayKey] ?? 0, 0, exList.length - 1);
 
-      const cur = getSetLog(week, dayKey, ex.id, sIdx, ex.targetReps);
+  document.getElementById("prevEx").onclick = () => {
+    state.exerciseIndex[dayKey] = Math.max(0, idx - 1);
+    saveState(); render(); haptic();
+  };
+  document.getElementById("nextEx").onclick = () => {
+    state.exerciseIndex[dayKey] = Math.min(exList.length - 1, idx + 1);
+    saveState(); render(); haptic();
+  };
 
-      kgEl.oninput = () => { cur.kg = kgEl.value; saveState(); };
-      repsEl.oninput = () => { cur.reps = repsEl.value; saveState(); };
+  const ex = exList[idx];
 
-      doneEl.onchange = () => {
-        cur.done = !!doneEl.checked;
-        saveState();
-        haptic();
-        if(cur.done && state.autoRest){
-          restSet(state.restDefaultSec || 90);
-          restStart();
-        }
-      };
-    }
-  });
+  for(let sIdx=0; sIdx<ex.sets; sIdx++){
+    const kgEl = document.getElementById(`kg_${ex.id}_${sIdx}`);
+    const repsEl = document.getElementById(`reps_${ex.id}_${sIdx}`);
+    const doneEl = document.getElementById(`done_${ex.id}_${sIdx}`);
+    const cur = getSetLog(week, dayKey, ex.id, sIdx, ex.targetReps);
+
+    kgEl.oninput = () => { cur.kg = kgEl.value; saveState(); };
+    repsEl.oninput = () => { cur.reps = repsEl.value; saveState(); };
+
+    doneEl.onchange = () => {
+      cur.done = !!doneEl.checked;
+      saveState();
+      haptic();
+      if(cur.done && state.autoRest){
+        restSet(state.restDefaultSec || 90);
+        restStart();
+      }
+    };
+  }
 }
 
+/* ---------- Run days ---------- */
 function renderRun(dayKey){
   const week = state.week;
 
@@ -754,12 +761,9 @@ function renderRun(dayKey){
 
   if(dayKey === "sat"){
     const p = RUN.sat.weeks[week];
-
     if(p.kind === "reps"){
-      // doesn’t fully “run” the 1km rep, but it sets your rest timer for between reps
       setIntervalPreset({ workSec:60, restSec:p.restSec, rounds:p.rounds });
     }
-
     const mainHtml = (p.kind === "steady" || p.kind === "tt")
       ? `<ul class="muted">
           <li><strong>${p.distanceKm.toFixed(1)} km</strong> @ <strong>${p.kmh.toFixed(1)} km/h</strong> (${paceFromKmh(p.kmh)})</li>
@@ -814,7 +818,6 @@ function renderRest(dayKey){
         <div class="muted">Recovery day. Keep it easy.</div>
       </div>
     </div>
-
     <ul class="muted">${items.map(i => `<li>${esc(i)}</li>`).join("")}</ul>
   `;
 }
