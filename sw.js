@@ -1,4 +1,4 @@
-const CACHE_NAME = "treadmill810-oneex-v1";
+const CACHE_NAME = "treadmill810-fit-v3";;
 const ASSETS = [
   "./",
   "./index.html",
