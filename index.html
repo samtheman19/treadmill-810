@@ -2,119 +2,99 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>2 km 8:10 – Treadmill Routine</title>
 
 <style>
-* { box-sizing: border-box; }
-
-html, body {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  overflow-x: hidden;
-  background: #0b0b0f;
-  color: #fff;
-  font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+:root{
+  --bg:#0b0b0f;
+  --card:#15151c;
+  --muted:#9aa0a6;
+  --accent:#6fd3ff;
 }
 
-/* App shell */
-.app {
-  max-width: 420px;
-  margin: 0 auto;
-  padding: 14px;
+*{box-sizing:border-box}
+html,body{
+  margin:0;
+  background:var(--bg);
+  color:#fff;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
+  overflow-x:hidden;
 }
 
-/* Cards */
-.card {
-  background: #15151c;
-  border-radius: 18px;
-  padding: 14px;
-  margin-bottom: 14px;
-  overflow-x: hidden;
+.app{
+  max-width:420px;
+  margin:0 auto;
+  padding:14px;
 }
 
-/* Buttons */
-button {
-  border: none;
-  border-radius: 14px;
-  padding: 10px 14px;
-  font-size: 15px;
+h1{font-size:20px;margin:8px 0}
+h2{font-size:18px;margin:8px 0}
+h3{font-size:16px;margin:6px 0}
+
+.card{
+  background:var(--card);
+  border-radius:16px;
+  padding:14px;
+  margin:10px 0;
 }
 
-.primary { background: #6fd3ff; color: #000; }
-.secondary { background: #23232c; color: #fff; }
-
-/* Headers */
-h1, h2, h3 { margin: 0 0 8px; }
-
-/* Workout header */
-.workoutHeader {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 10px;
-  align-items: center;
+button{
+  background:#222;
+  color:#fff;
+  border:none;
+  border-radius:14px;
+  padding:10px 14px;
+  font-size:14px;
 }
 
-/* Timer */
-.timer {
-  font-size: 36px;
-  font-weight: 700;
+button.primary{
+  background:var(--accent);
+  color:#000;
+  font-weight:600;
 }
 
-/* Checkbox row */
-.checkboxRow {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  white-space: nowrap;
+select,input{
+  background:#1e1e26;
+  color:#fff;
+  border:none;
+  border-radius:12px;
+  padding:8px 10px;
+  font-size:14px;
+  width:100%;
 }
 
-/* Exercise nav */
-.exerciseNav {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
+.row{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  flex-wrap:wrap;
 }
 
-/* === SET ROW GRID (iPhone safe) === */
-.setRowGrid,
-.setRowGridHeader {
-  display: grid;
-  grid-template-columns: 34px minmax(0,1fr) minmax(0,1fr) 40px;
-  gap: 8px;
-  align-items: center;
-  width: 100%;
+.small{color:var(--muted);font-size:13px}
+
+.setGrid{
+  display:grid;
+  grid-template-columns:28px 1fr 1fr 36px;
+  gap:8px;
+  align-items:center;
+  width:100%;
 }
 
-.setRowGrid input {
-  width: 100%;
-  min-width: 0;
-  height: 34px;
-  padding: 6px 8px;
-  font-size: 14px;
-  border-radius: 10px;
-  border: none;
-  background: #23232c;
-  color: #fff;
+.setGrid input{
+  height:34px;
+  font-size:14px;
 }
 
-.setRowGrid input[type="checkbox"] {
-  width: 22px;
-  height: 22px;
+.checkbox{
+  width:22px;
+  height:22px;
 }
 
-/* Interval grid */
-.intervalGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-.muted {
-  color: #9aa0a6;
-  font-size: 13px;
+.timer{
+  font-size:42px;
+  text-align:center;
+  margin:10px 0;
 }
 </style>
 </head>
@@ -124,63 +104,108 @@ h1, h2, h3 { margin: 0 0 8px; }
 
 <h1>2 km 8:10 – Treadmill Routine</h1>
 
-<div class="card workoutHeader">
-  <div>
-    <strong>Workout</strong><br>
-    <span class="muted">Today</span>
-  </div>
-  <button class="primary">Start</button>
+<div class="row">
+  <select id="day">
+    <option value="strength">Mon – Strength A</option>
+    <option value="intervals">Tue – Intervals</option>
+    <option value="mobility">Wed – Mobility / Rest</option>
+  </select>
+  <button onclick="resetDay()">Reset day</button>
 </div>
 
+<button class="primary" onclick="resetWeek()">Reset week</button>
+
+<!-- WORKOUT TIMER -->
 <div class="card">
-  <div class="timer">00:00:00</div>
-  <div class="checkboxRow">
-    <input type="checkbox" checked />
-    <span>Auto-start rest when set done</span>
+  <h2>Workout</h2>
+  <div class="timer" id="workoutTime">00:00:00</div>
+  <div class="row">
+    <button class="primary" onclick="startWorkout()">Start</button>
+    <button onclick="pauseWorkout()">Pause</button>
+    <button onclick="endWorkout()">End (save)</button>
   </div>
 </div>
 
-<div class="card">
+<!-- STRENGTH -->
+<div class="card" id="strengthCard">
+  <h2>Strength A</h2>
+
   <h3>Trap Bar Deadlift</h3>
-  <p class="muted">4 sets • target reps: 3</p>
+  <div class="small">4 sets • target reps: 3</div>
 
-  <div class="setRowGridHeader muted">
+  <div class="setGrid">
     <div>#</div><div>kg</div><div>reps</div><div>✓</div>
+
+    <div>1</div><input /><input value="3"/><input type="checkbox" class="checkbox">
+    <div>2</div><input /><input value="3"/><input type="checkbox" class="checkbox">
+    <div>3</div><input /><input value="3"/><input type="checkbox" class="checkbox">
+    <div>4</div><input /><input value="3"/><input type="checkbox" class="checkbox">
   </div>
 
-  <div class="setRowGrid">
-    <div>1</div><input placeholder="kg"><input value="3"><input type="checkbox">
-  </div>
-  <div class="setRowGrid">
-    <div>2</div><input placeholder="kg"><input value="3"><input type="checkbox">
-  </div>
-  <div class="setRowGrid">
-    <div>3</div><input placeholder="kg"><input value="3"><input type="checkbox">
-  </div>
-  <div class="setRowGrid">
-    <div>4</div><input placeholder="kg"><input value="3"><input type="checkbox">
+  <h3 style="margin-top:12px">Bulgarian Split Squat</h3>
+  <div class="small">3 sets • target reps: 5 each leg</div>
+
+  <div class="setGrid">
+    <div>1</div><input /><input value="5"/><input type="checkbox" class="checkbox">
+    <div>2</div><input /><input value="5"/><input type="checkbox" class="checkbox">
+    <div>3</div><input /><input value="5"/><input type="checkbox" class="checkbox">
   </div>
 </div>
 
+<!-- INTERVAL TIMER -->
 <div class="card">
-  <h3>Interval Timer</h3>
-  <div class="timer">00:00</div>
+  <h2>Interval Timer</h2>
+  <div class="timer" id="intervalTime">00:00</div>
 
-  <div class="intervalGrid">
-    <input value="95" placeholder="Work (sec)">
-    <input value="90" placeholder="Rest (sec)">
+  <div class="row">
+    <button class="primary" onclick="startInterval()">Start</button>
+    <button onclick="pauseInterval()">Pause</button>
+    <button onclick="stopInterval()">Stop</button>
   </div>
 
-  <div class="intervalGrid">
-    <input value="6" placeholder="Rounds">
-    <button class="primary">Start</button>
+  <div class="row">
+    <input id="workSec" placeholder="Work (sec)" value="95">
+    <input id="restSec" placeholder="Rest (sec)" value="90">
   </div>
+  <input id="rounds" placeholder="Rounds" value="6">
 </div>
 
-<p class="muted" style="text-align:center;">
-Safari → Share → Add to Home Screen
-</p>
-
 </div>
+
+<script>
+let wTimer=null,wSec=0,iTimer=null,iSec=0;
+
+function fmt(s){
+  const h=Math.floor(s/3600);
+  const m=Math.floor((s%3600)/60);
+  const r=s%60;
+  return (h>0?String(h).padStart(2,"0")+":":"")+String(m).padStart(2,"0")+":"+String(r).padStart(2,"0");
+}
+
+function startWorkout(){
+  if(wTimer) return;
+  wTimer=setInterval(()=>{
+    wSec++;
+    document.getElementById("workoutTime").innerText=fmt(wSec);
+  },1000);
+}
+function pauseWorkout(){clearInterval(wTimer);wTimer=null}
+function endWorkout(){pauseWorkout();alert("Workout saved")}
+
+function startInterval(){
+  if(iTimer) return;
+  iSec=0;
+  iTimer=setInterval(()=>{
+    iSec++;
+    document.getElementById("intervalTime").innerText=fmt(iSec);
+  },1000);
+}
+function pauseInterval(){clearInterval(iTimer);iTimer=null}
+function stopInterval(){pauseInterval();iSec=0;document.getElementById("intervalTime").innerText="00:00"}
+
+function resetDay(){location.reload()}
+function resetWeek(){localStorage.clear();location.reload()}
+</script>
+
 </body>
 </html>
