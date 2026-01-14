@@ -1,14 +1,16 @@
 /* 2 km 8:10 – Treadmill Routine
-   Strength logging: kg + LW (auto-filled) + reps + rest countdown per set tick
-   Day selector restored
-   Rest settings moved to end
+   Strength logging: kg + LWkg (read-only) + reps + LWreps (read-only)
+   Per-set rest countdown box starts when set ticked
+   Full week (7 days) + day selector
+   Rest settings moved to end of strength day
    Mobility separate with countdown + tick
+   Interval timer ONLY shown on RUN days (removed from strength)
 */
 
-const STORAGE_KEY = "treadmill810_v6";
+const STORAGE_KEY = "treadmill810_v7";
 const TODAY_KEY = () => new Date().toISOString().slice(0, 10);
 
-// -------------------- Plan --------------------
+// -------------------- Plan (FULL WEEK) --------------------
 const days = [
   {
     key: "mon",
@@ -59,6 +61,66 @@ const days = [
       { id: "calves2", name: "Calves", seconds: 60, note: "per side" },
       { id: "thoracic", name: "Thoracic rotations", seconds: 60, note: "per side" }
     ]
+  },
+  {
+    key: "thu",
+    name: "Thu – Strength B",
+    warmup: [
+      "3 min easy walk or jog",
+      "Hip openers 60 sec",
+      "Ankle & calf mobility 60 sec"
+    ],
+    main: {
+      type: "strength",
+      exercises: [
+        { id: "rdl", name: "Romanian Deadlift", sets: 4, targetReps: 6, note: "controlled" },
+        { id: "split", name: "Reverse Lunge", sets: 3, targetReps: 6, note: "each leg" },
+        { id: "step", name: "Step-ups", sets: 3, targetReps: 8, note: "each leg" },
+        { id: "calf2", name: "Seated Calf Raises", sets: 3, targetReps: 12, note: "slow down" }
+      ]
+    },
+    mobility: [
+      { id: "hipFlex", name: "Hip flexor stretch", seconds: 60, note: "per side" },
+      { id: "ham", name: "Hamstring stretch", seconds: 60, note: "per side" }
+    ]
+  },
+  {
+    key: "fri",
+    name: "Fri – Easy Run",
+    warmup: ["Incline 1.0%", "3 min jog"],
+    main: {
+      type: "run",
+      title: "Easy Run",
+      details: [
+        "20–30 min easy",
+        "Speed: 10.0–12.0 km/h (6:00–5:00/km)",
+        "Incline: 1.0%"
+      ]
+    },
+    mobility: [{ id: "calfStretch3", name: "Calf stretch", seconds: 60, note: "per side" }]
+  },
+  {
+    key: "sat",
+    name: "Sat – Tempo / Steady",
+    warmup: ["Incline 1.0%", "5 min easy jog"],
+    main: {
+      type: "run",
+      title: "Tempo / Steady",
+      details: [
+        "10 min easy @ 11.0–12.0 km/h",
+        "10–15 min steady @ 13.0–14.0 km/h",
+        "5 min easy cool down",
+        "Incline: 1.0%"
+      ]
+    },
+    mobility: [{ id: "glutes2", name: "Glute stretch", seconds: 60, note: "per side" }]
+  },
+  {
+    key: "sun",
+    name: "Sun – Rest / Walk",
+    warmup: [],
+    main: { type: "rest", details: ["Optional 20–40 min walk", "Keep it easy."] },
+    mobility: [{ id: "fullbody", name: "Full body stretch", seconds: 180, note: "easy" }]
   }
 ];
 
@@ -73,12 +135,10 @@ const defaultState = {
     lastSaved: null
   },
   logs: {
-    // strength logs per week/day/exercise/set
-    // structure:
     // logs[week][dayKey][exerciseId][setIndex] = { kg, reps, done, restEndsAtMs }
   },
   mobility: {
-    // mobility[dayKey][mobId] = { done, remaining, running, endsAtMs }
+    // mobility[dayKey][mobId] = { done, running, endsAtMs }
   }
 };
 
@@ -115,8 +175,6 @@ function formatMS(ms) {
   return `${m}:${s}`;
 }
 function currentWeekNumber() {
-  // simple rolling week number since Jan 1, 2026 (stable for your app)
-  // You can change this base date whenever you want to restart weeks.
   const base = new Date("2026-01-01T00:00:00Z").getTime();
   const now = Date.now();
   const diffDays = Math.floor((now - base) / (24 * 3600 * 1000));
@@ -155,11 +213,10 @@ const restSecondsInput = document.getElementById("restSeconds");
 
 // -------------------- Init UI --------------------
 function init() {
-  // day selector restored
   daySelect.innerHTML = days.map(d => `<option value="${d.key}">${d.name}</option>`).join("");
   daySelect.value = state.dayKey;
 
-  restSecondsInput.value = state.restSeconds;
+  if (restSecondsInput) restSecondsInput.value = state.restSeconds;
 
   render();
   startTick();
@@ -187,13 +244,10 @@ function sessionPause() {
   renderSession();
 }
 function sessionEndSave() {
-  // stop + save lastSaved timestamp
   state.session.elapsedMs = sessionNowElapsedMs();
   state.session.running = false;
   state.session.startedAt = null;
   state.session.lastSaved = { date: TODAY_KEY(), elapsedMs: state.session.elapsedMs };
-  // reset elapsed for next workout if you want:
-  // state.session.elapsedMs = 0;
   saveState();
   renderSession();
 }
@@ -227,13 +281,10 @@ function setDoneAndStartRest(dayKey, exId, setIdx, done) {
   row.done = done;
 
   if (done) {
-    // start rest countdown (small box next to tick)
     row.restEndsAtMs = Date.now() + (Number(state.restSeconds) * 1000);
   } else {
-    // clear rest if unticked
     row.restEndsAtMs = null;
   }
-
   saveState();
 }
 
@@ -247,12 +298,6 @@ function mobStart(dayKey, mobId, seconds) {
   m.running = true;
   m.endsAtMs = Date.now() + seconds * 1000;
   m.done = false;
-  saveState();
-}
-function mobStop(dayKey, mobId) {
-  const m = getMob(dayKey, mobId);
-  m.running = false;
-  m.endsAtMs = null;
   saveState();
 }
 function mobToggleDone(dayKey, mobId, done) {
@@ -281,17 +326,19 @@ function renderDay() {
   const day = dayByKey(state.dayKey);
   dayTitleEl.textContent = day.name;
 
-  warmupList.innerHTML = (day.warmup || []).map(x => `<li>${escapeHtml(x)}</li>`).join("") || `<li class="muted">—</li>`;
+  warmupList.innerHTML =
+    (day.warmup || []).map(x => `<li>${escapeHtml(x)}</li>`).join("") || `<li class="muted">—</li>`;
 
   // Main
   if (day.main.type === "strength") {
-    mainBlock.innerHTML = day.main.exercises.map(ex => renderExercise(day.key, ex)).join("");
+    mainBlock.innerHTML = `
+      ${(day.main.exercises || []).map(ex => renderExercise(day.key, ex)).join("")}
+      ${renderRestSettings()} 
+    `;
   } else if (day.main.type === "run") {
     mainBlock.innerHTML = `
       <div class="cardTitle">${escapeHtml(day.main.title || "Run")}</div>
-      <ul>
-        ${(day.main.details || []).map(x => `<li>${escapeHtml(x)}</li>`).join("")}
-      </ul>
+      <ul>${(day.main.details || []).map(x => `<li>${escapeHtml(x)}</li>`).join("")}</ul>
       <div class="hr"></div>
       <div class="cardTitle">Interval Timer</div>
       <div class="muted">Use for work/rest intervals</div>
@@ -305,7 +352,8 @@ function renderDay() {
   }
 
   // Mobility card
-  mobilityList.innerHTML = (day.mobility || []).map(m => renderMobItem(day.key, m)).join("") || `<div class="muted">—</div>`;
+  mobilityList.innerHTML =
+    (day.mobility || []).map(m => renderMobItem(day.key, m)).join("") || `<div class="muted">—</div>`;
 }
 function renderExercise(dayKey, ex) {
   const wk = getWeekKey();
@@ -315,11 +363,9 @@ function renderExercise(dayKey, ex) {
     const setIdx = i + 1;
     const row = exLog[String(setIdx)] || { kg: "", reps: ex.targetReps, done: false, restEndsAtMs: null };
 
-    // LW auto-filled (read-only)
     const lwKg = getLastWeekValue(dayKey, ex.id, setIdx, "kg");
-    const lwReps = getLastWeekValue(dayKey, ex.id, setIdx, "reps"); // used later if you want a LW reps column (we can add next)
+    const lwReps = getLastWeekValue(dayKey, ex.id, setIdx, "reps");
 
-    // rest countdown box
     let remaining = 0;
     if (row.restEndsAtMs) remaining = Math.max(0, row.restEndsAtMs - Date.now());
     const restLabel = row.restEndsAtMs ? formatMS(remaining) : "—";
@@ -332,13 +378,15 @@ function renderExercise(dayKey, ex) {
           value="${escapeAttr(row.kg ?? "")}"
           data-kg="${ex.id}|${setIdx}" />
 
-        <div class="pillRead" title="Last week (kg)">${lwKg !== "" ? escapeHtml(String(lwKg)) : "LW"}</div>
+        <div class="pillRead" title="Last week kg">${lwKg !== "" ? escapeHtml(String(lwKg)) : "LW"}</div>
 
         <input class="pillInput" inputmode="numeric" placeholder="${ex.targetReps}"
           value="${escapeAttr(row.reps ?? ex.targetReps)}"
           data-reps="${ex.id}|${setIdx}" />
 
-        <div class="restBox" data-restbox="${ex.id}|${setIdx}">${restLabel}</div>
+        <div class="pillRead" title="Last week reps">${lwReps !== "" ? escapeHtml(String(lwReps)) : "LW"}</div>
+
+        <div class="restBox" data-restbox="${ex.id}|${setIdx}" title="Rest countdown">${restLabel}</div>
 
         <div class="doneWrap">
           <input class="done" type="checkbox"
@@ -355,9 +403,24 @@ function renderExercise(dayKey, ex) {
       <div class="exMeta">${ex.sets} sets · target reps ${ex.targetReps}${ex.note ? ` · ${escapeHtml(ex.note)}` : ""}</div>
 
       <div class="tableHead">
-        <div>#</div><div>kg</div><div>LW</div><div>reps</div><div>⏱</div><div>✓</div>
+        <div>#</div><div>kg</div><div>LW</div><div>reps</div><div>LW</div><div>⏱</div><div>✓</div>
       </div>
       ${rows}
+    </div>
+  `;
+}
+function renderRestSettings() {
+  return `
+    <div class="hr"></div>
+    <div class="cardTitle">Rest settings</div>
+    <div class="muted">Tick a set to auto-start the countdown next to it.</div>
+    <div class="row" style="margin-top:10px;">
+      <button class="btn" data-rest="60">60s</button>
+      <button class="btn" data-rest="90">90s</button>
+      <button class="btn" data-rest="120">120s</button>
+      <div class="spacer"></div>
+      <input id="restSeconds" type="number" min="10" max="600" value="${Number(state.restSeconds) || 90}" style="width:120px;" />
+      <div class="muted" style="padding-left:8px;">sec</div>
     </div>
   `;
 }
@@ -384,7 +447,6 @@ function renderMobItem(dayKey, m) {
   `;
 }
 function renderIntervalTimer() {
-  // simple interval timer only shown on RUN days
   return `
     <div class="card" style="margin:12px 0 0;">
       <div class="row" style="align-items:flex-end;">
@@ -417,7 +479,6 @@ function render() {
 
 // -------------------- Handlers --------------------
 function attachHandlers() {
-  // Day select
   daySelect.onchange = () => {
     state.dayKey = daySelect.value;
     saveState();
@@ -425,12 +486,8 @@ function attachHandlers() {
   };
 
   resetDayBtn.onclick = () => {
-    // clears today's day logs for current week/day
     const wk = getWeekKey();
-    if (state.logs[wk] && state.logs[wk][state.dayKey]) {
-      delete state.logs[wk][state.dayKey];
-    }
-    // mobility reset
+    if (state.logs[wk] && state.logs[wk][state.dayKey]) delete state.logs[wk][state.dayKey];
     if (state.mobility[state.dayKey]) delete state.mobility[state.dayKey];
     saveState();
     render();
@@ -443,33 +500,34 @@ function attachHandlers() {
     render();
   };
 
-  // Session timer
   sessionStartBtn.onclick = sessionStart;
   sessionPauseBtn.onclick = sessionPause;
   sessionEndBtn.onclick = sessionEndSave;
 
-  // Rest settings
   document.querySelectorAll("[data-rest]").forEach(btn => {
     btn.onclick = () => {
       state.restSeconds = Number(btn.getAttribute("data-rest")) || 90;
-      restSecondsInput.value = state.restSeconds;
+      if (restSecondsInput) restSecondsInput.value = state.restSeconds;
       saveState();
     };
   });
-  restSecondsInput.onchange = () => {
-    const v = Number(restSecondsInput.value || 90);
-    state.restSeconds = Math.min(600, Math.max(10, v));
-    restSecondsInput.value = state.restSeconds;
-    saveState();
-  };
 
-  // Strength inputs
+  if (restSecondsInput) {
+    restSecondsInput.onchange = () => {
+      const v = Number(restSecondsInput.value || 90);
+      state.restSeconds = Math.min(600, Math.max(10, v));
+      restSecondsInput.value = state.restSeconds;
+      saveState();
+    };
+  }
+
   document.querySelectorAll("[data-kg]").forEach(inp => {
     inp.oninput = () => {
       const [exId, setIdx] = inp.getAttribute("data-kg").split("|");
       setTodayValue(state.dayKey, exId, Number(setIdx), "kg", inp.value);
     };
   });
+
   document.querySelectorAll("[data-reps]").forEach(inp => {
     inp.oninput = () => {
       const [exId, setIdx] = inp.getAttribute("data-reps").split("|");
@@ -477,18 +535,15 @@ function attachHandlers() {
     };
   });
 
-  // Tick done -> starts per-set rest countdown box
   document.querySelectorAll("[data-done]").forEach(chk => {
     chk.onchange = () => {
       const [exId, setIdx] = chk.getAttribute("data-done").split("|");
       setDoneAndStartRest(state.dayKey, exId, Number(setIdx), chk.checked);
-      // re-render so the timer box shows immediately
       renderDay();
       attachHandlers();
     };
   });
 
-  // Mobility
   document.querySelectorAll("[data-mobstart]").forEach(btn => {
     btn.onclick = () => {
       const mobId = btn.getAttribute("data-mobstart");
@@ -496,11 +551,11 @@ function attachHandlers() {
       const item = (day.mobility || []).find(x => x.id === mobId);
       if (!item) return;
       mobStart(state.dayKey, mobId, item.seconds);
-      saveState();
       renderDay();
       attachHandlers();
     };
   });
+
   document.querySelectorAll("[data-mobdone]").forEach(chk => {
     chk.onchange = () => {
       const mobId = chk.getAttribute("data-mobdone");
@@ -510,7 +565,6 @@ function attachHandlers() {
     };
   });
 
-  // Interval timer only if present (run days)
   const itTime = document.getElementById("itTime");
   if (itTime) setupIntervalTimer();
 }
@@ -520,13 +574,12 @@ let tickTimer = null;
 function startTick() {
   if (tickTimer) clearInterval(tickTimer);
   tickTimer = setInterval(() => {
-    // update session time
     sessionTimeEl.textContent = formatHMS(sessionNowElapsedMs());
 
-    // update per-set rest boxes without full re-render
     const wk = getWeekKey();
     const dayKey = state.dayKey;
     const day = dayByKey(dayKey);
+
     if (day.main.type === "strength") {
       (day.main.exercises || []).forEach(ex => {
         const exLog = (((state.logs || {})[wk] || {})[dayKey] || {})[ex.id] || {};
@@ -534,11 +587,11 @@ function startTick() {
           const row = exLog[String(i)];
           const el = document.querySelector(`[data-restbox="${ex.id}|${i}"]`);
           if (!el) continue;
+
           if (row && row.restEndsAtMs) {
             const rem = Math.max(0, row.restEndsAtMs - Date.now());
             el.textContent = formatMS(rem);
             if (rem <= 0) {
-              // stop timer display at zero (keep done tick)
               row.restEndsAtMs = null;
               saveState();
               el.textContent = "—";
@@ -551,7 +604,6 @@ function startTick() {
       });
     }
 
-    // mobility countdown update
     (day.mobility || []).forEach(m => {
       const mob = getMob(dayKey, m.id);
       if (mob.running && mob.endsAtMs) {
@@ -561,22 +613,15 @@ function startTick() {
           mob.endsAtMs = null;
           saveState();
           beep();
-          // refresh only mobility section
           renderDay();
           attachHandlers();
-        } else {
-          // update displayed time if visible
-          const nodes = mobilityList.querySelectorAll(".mobItem");
-          nodes.forEach(node => {
-            // simplest: full render handled above when finishing; keep light here
-          });
         }
       }
     });
   }, 250);
 }
 
-// -------------------- Interval Timer (Run days only) --------------------
+// -------------------- Interval Timer (RUN days only) --------------------
 function setupIntervalTimer() {
   const itTime = document.getElementById("itTime");
   const itStart = document.getElementById("itStart");
@@ -592,9 +637,7 @@ function setupIntervalTimer() {
   let endsAt = null;
   let round = 1;
 
-  function setDisplay(ms) {
-    itTime.textContent = formatMS(ms);
-  }
+  function setDisplay(ms) { itTime.textContent = formatMS(ms); }
   function startPhase() {
     const work = Number(itWork.value || 95) * 1000;
     const rest = Number(itRest.value || 90) * 1000;
@@ -607,24 +650,18 @@ function setupIntervalTimer() {
     setDisplay(rem);
     if (rem <= 0) {
       beep();
-      if (itAuto.value === "off") {
-        running = false;
-        return;
-      }
-      // switch
+      if (itAuto.value === "off") { running = false; return; }
       if (phase === "work") phase = "rest";
       else {
         phase = "work";
         round += 1;
         const totalRounds = Number(itRounds.value || 6);
-        if (round > totalRounds) {
-          running = false;
-          return;
-        }
+        if (round > totalRounds) { running = false; return; }
       }
       startPhase();
     }
   }
+
   itStart.onclick = () => {
     if (running) return;
     running = true;
