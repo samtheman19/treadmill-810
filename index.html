@@ -18,7 +18,7 @@ html,body{
   margin:0;
   background:var(--bg);
   color:#fff;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
+  font-family:-apple-system,BlinkMacSystemFont,system-ui,Roboto;
   overflow-x:hidden;
 }
 
@@ -28,19 +28,32 @@ html,body{
   padding:14px;
 }
 
-h1{font-size:20px;margin:8px 0}
+h1{font-size:20px;margin:8px 0 6px}
 h2{font-size:18px;margin:8px 0}
-h3{font-size:16px;margin:6px 0}
+h3{font-size:16px;margin:8px 0 4px}
+
+.small{color:var(--muted);font-size:13px}
 
 .card{
   background:var(--card);
   border-radius:16px;
   padding:14px;
   margin:10px 0;
+  overflow-x:hidden;
 }
 
+.row{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+.row > *{flex:1}
+.row button{flex:0 0 auto}
+
 button{
-  background:#222;
+  background:#23232c;
   color:#fff;
   border:none;
   border-radius:14px;
@@ -51,7 +64,7 @@ button{
 button.primary{
   background:var(--accent);
   color:#000;
-  font-weight:600;
+  font-weight:700;
 }
 
 select,input{
@@ -64,18 +77,30 @@ select,input{
   width:100%;
 }
 
-.row{
+/* ✅ fixes the vertical stacked text */
+.checkLine{
   display:flex;
-  gap:8px;
   align-items:center;
-  flex-wrap:wrap;
+  gap:10px;
+  width:100%;
+  margin-top:10px;
+}
+.checkLine input{
+  width:22px;
+  height:22px;
+  flex:0 0 auto;
+}
+.checkLine span{
+  flex:1 1 auto;
+  white-space:normal;
+  line-height:1.2;
 }
 
-.small{color:var(--muted);font-size:13px}
-
+/* ✅ iPhone set row grid: no sideways scrolling */
+.setGridHeader,
 .setGrid{
   display:grid;
-  grid-template-columns:28px 1fr 1fr 36px;
+  grid-template-columns:30px minmax(0,1fr) minmax(0,1fr) 38px;
   gap:8px;
   align-items:center;
   width:100%;
@@ -84,17 +109,29 @@ select,input{
 .setGrid input{
   height:34px;
   font-size:14px;
+  min-width:0;
 }
 
-.checkbox{
+.setGrid input[type="checkbox"]{
   width:22px;
   height:22px;
 }
 
+/* Timer blocks */
 .timer{
   font-size:42px;
-  text-align:center;
-  margin:10px 0;
+  font-weight:800;
+  letter-spacing:1px;
+  line-height:1;
+  margin:8px 0 10px;
+}
+
+.timerSmall{
+  font-size:34px;
+  font-weight:800;
+  letter-spacing:1px;
+  line-height:1;
+  margin:8px 0 10px;
 }
 </style>
 </head>
@@ -106,9 +143,9 @@ select,input{
 
 <div class="row">
   <select id="day">
-    <option value="strength">Mon – Strength A</option>
-    <option value="intervals">Tue – Intervals</option>
-    <option value="mobility">Wed – Mobility / Rest</option>
+    <option value="mon">Mon – Strength A</option>
+    <option value="tue">Tue – Intervals</option>
+    <option value="wed">Wed – Mobility / Rest</option>
   </select>
   <button onclick="resetDay()">Reset day</button>
 </div>
@@ -117,94 +154,169 @@ select,input{
 
 <!-- WORKOUT TIMER -->
 <div class="card">
-  <h2>Workout</h2>
-  <div class="timer" id="workoutTime">00:00:00</div>
-  <div class="row">
-    <button class="primary" onclick="startWorkout()">Start</button>
-    <button onclick="pauseWorkout()">Pause</button>
-    <button onclick="endWorkout()">End (save)</button>
+  <div class="row" style="align-items:flex-start">
+    <div style="flex:1">
+      <h2 style="margin:0">Workout</h2>
+      <div class="small">Date: <span id="dateTxt"></span> • Streak: <span id="streakTxt">0</span></div>
+      <div style="margin-top:8px">
+        <span class="small" style="display:block;margin-bottom:4px">Workout time</span>
+        <div class="timer" id="workoutTime">00:00:00</div>
+        <div class="small" id="workoutState">Paused</div>
+      </div>
+      <div class="small" style="margin-top:10px">Week</div>
+      <input id="weekNum" value="1" />
+    </div>
+
+    <div style="flex:0 0 auto;display:flex;flex-direction:column;gap:10px;margin-top:22px">
+      <button class="primary" onclick="startWorkout()">Start</button>
+      <button onclick="pauseWorkout()">Pause</button>
+      <button onclick="endWorkout()">End (save)</button>
+    </div>
+  </div>
+
+  <div class="checkLine">
+    <input id="autoRest" type="checkbox" checked />
+    <span class="small">Auto-start rest when set done</span>
   </div>
 </div>
 
 <!-- STRENGTH -->
 <div class="card" id="strengthCard">
-  <h2>Strength A</h2>
+  <h2 style="margin-bottom:2px">Mon – Strength A</h2>
+  <div class="small">One exercise view • swipe less • faster to log</div>
 
-  <h3>Trap Bar Deadlift</h3>
-  <div class="small">4 sets • target reps: 3</div>
+  <h3 style="margin-top:14px">Trap Bar Deadlift</h3>
+  <div class="small">4 sets • target reps: 3 • Fast reps, no grind</div>
 
-  <div class="setGrid">
-    <div>#</div><div>kg</div><div>reps</div><div>✓</div>
-
-    <div>1</div><input /><input value="3"/><input type="checkbox" class="checkbox">
-    <div>2</div><input /><input value="3"/><input type="checkbox" class="checkbox">
-    <div>3</div><input /><input value="3"/><input type="checkbox" class="checkbox">
-    <div>4</div><input /><input value="3"/><input type="checkbox" class="checkbox">
+  <div class="setGridHeader small" style="margin-top:10px">
+    <div>Set</div><div>kg</div><div>reps</div><div>Done</div>
   </div>
 
-  <h3 style="margin-top:12px">Bulgarian Split Squat</h3>
-  <div class="small">3 sets • target reps: 5 each leg</div>
+  <div class="setGrid" style="margin-top:8px">
+    <div>#1</div><input placeholder="kg (lw —)" /><input value="3" /><input type="checkbox" />
+    <div>#2</div><input placeholder="kg (lw —)" /><input value="3" /><input type="checkbox" />
+    <div>#3</div><input placeholder="kg (lw —)" /><input value="3" /><input type="checkbox" />
+    <div>#4</div><input placeholder="kg (lw —)" /><input value="3" /><input type="checkbox" />
+  </div>
 
-  <div class="setGrid">
-    <div>1</div><input /><input value="5"/><input type="checkbox" class="checkbox">
-    <div>2</div><input /><input value="5"/><input type="checkbox" class="checkbox">
-    <div>3</div><input /><input value="5"/><input type="checkbox" class="checkbox">
+  <h3 style="margin-top:16px">Rest timer</h3>
+  <div class="row" style="gap:8px;flex-wrap:nowrap">
+    <button onclick="presetRest(60)">60s</button>
+    <button onclick="presetRest(90)">90s</button>
+    <button onclick="presetRest(120)">120s</button>
+    <input id="restInput" value="90" style="max-width:110px" />
+    <div class="small" style="flex:0 0 auto">sec</div>
+  </div>
+
+  <div class="timerSmall" id="restTime">01:30</div>
+
+  <div class="row" style="gap:8px;flex-wrap:nowrap">
+    <button class="primary" onclick="startRest()">Start</button>
+    <button onclick="pauseRest()">Pause</button>
+    <button onclick="resetRest()">Reset</button>
   </div>
 </div>
 
 <!-- INTERVAL TIMER -->
 <div class="card">
   <h2>Interval Timer</h2>
-  <div class="timer" id="intervalTime">00:00</div>
+  <div class="timerSmall" id="intervalTime">00:00</div>
 
-  <div class="row">
+  <div class="row" style="gap:8px;flex-wrap:nowrap">
     <button class="primary" onclick="startInterval()">Start</button>
     <button onclick="pauseInterval()">Pause</button>
     <button onclick="stopInterval()">Stop</button>
   </div>
 
-  <div class="row">
-    <input id="workSec" placeholder="Work (sec)" value="95">
-    <input id="restSec" placeholder="Rest (sec)" value="90">
+  <div style="margin-top:10px">
+    <input id="workSec" placeholder="Work (sec)" value="95" />
   </div>
-  <input id="rounds" placeholder="Rounds" value="6">
+  <div style="margin-top:10px">
+    <input id="restSec" placeholder="Rest (sec)" value="90" />
+  </div>
+  <div style="margin-top:10px">
+    <input id="rounds" placeholder="Rounds" value="6" />
+  </div>
 </div>
 
 </div>
 
 <script>
-let wTimer=null,wSec=0,iTimer=null,iSec=0;
+/* Simple timers (lightweight + iPhone safe) */
+let workoutId=null, workoutSec=0;
+let restId=null, restLeft=90;
+let intervalId=null, intervalSec=0;
 
-function fmt(s){
+document.getElementById("dateTxt").innerText = new Date().toISOString().slice(0,10);
+
+function fmtHMS(s){
   const h=Math.floor(s/3600);
   const m=Math.floor((s%3600)/60);
   const r=s%60;
-  return (h>0?String(h).padStart(2,"0")+":":"")+String(m).padStart(2,"0")+":"+String(r).padStart(2,"0");
+  return String(h).padStart(2,"0")+":"+String(m).padStart(2,"0")+":"+String(r).padStart(2,"0");
+}
+function fmtMS(s){
+  const m=Math.floor(s/60);
+  const r=s%60;
+  return String(m).padStart(2,"0")+":"+String(r).padStart(2,"0");
 }
 
+/* Workout */
 function startWorkout(){
-  if(wTimer) return;
-  wTimer=setInterval(()=>{
-    wSec++;
-    document.getElementById("workoutTime").innerText=fmt(wSec);
+  if(workoutId) return;
+  document.getElementById("workoutState").innerText="Running";
+  workoutId=setInterval(()=>{
+    workoutSec++;
+    document.getElementById("workoutTime").innerText=fmtHMS(workoutSec);
   },1000);
 }
-function pauseWorkout(){clearInterval(wTimer);wTimer=null}
-function endWorkout(){pauseWorkout();alert("Workout saved")}
+function pauseWorkout(){
+  clearInterval(workoutId); workoutId=null;
+  document.getElementById("workoutState").innerText="Paused";
+}
+function endWorkout(){
+  pauseWorkout();
+  alert("Saved (demo). Next step: store history in localStorage.");
+}
 
+/* Rest */
+function presetRest(s){
+  restLeft=s;
+  document.getElementById("restInput").value=String(s);
+  document.getElementById("restTime").innerText=fmtMS(restLeft);
+}
+function startRest(){
+  if(restId) return;
+  const v=parseInt(document.getElementById("restInput").value||"90",10);
+  if(!Number.isFinite(v) || v<=0) return;
+  if(restLeft<=0 || restLeft===90) restLeft=v;
+  restId=setInterval(()=>{
+    restLeft--;
+    document.getElementById("restTime").innerText=fmtMS(Math.max(0,restLeft));
+    if(restLeft<=0){ clearInterval(restId); restId=null; }
+  },1000);
+}
+function pauseRest(){ clearInterval(restId); restId=null; }
+function resetRest(){
+  pauseRest();
+  const v=parseInt(document.getElementById("restInput").value||"90",10);
+  restLeft=v;
+  document.getElementById("restTime").innerText=fmtMS(restLeft);
+}
+
+/* Interval (simple stopwatch style for now) */
 function startInterval(){
-  if(iTimer) return;
-  iSec=0;
-  iTimer=setInterval(()=>{
-    iSec++;
-    document.getElementById("intervalTime").innerText=fmt(iSec);
+  if(intervalId) return;
+  intervalId=setInterval(()=>{
+    intervalSec++;
+    document.getElementById("intervalTime").innerText=fmtMS(intervalSec);
   },1000);
 }
-function pauseInterval(){clearInterval(iTimer);iTimer=null}
-function stopInterval(){pauseInterval();iSec=0;document.getElementById("intervalTime").innerText="00:00"}
+function pauseInterval(){ clearInterval(intervalId); intervalId=null; }
+function stopInterval(){ pauseInterval(); intervalSec=0; document.getElementById("intervalTime").innerText="00:00"; }
 
-function resetDay(){location.reload()}
-function resetWeek(){localStorage.clear();location.reload()}
+function resetDay(){ location.reload(); }
+function resetWeek(){ localStorage.clear(); location.reload(); }
 </script>
 
 </body>
