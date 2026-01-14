@@ -1,13 +1,14 @@
-/* 2 km 8:10 – Treadmill Routine
-   Strength logging: kg + LWkg (read-only) + reps + LWreps (read-only)
-   Per-set rest countdown box starts when set ticked
-   Full week (7 days) + day selector
-   Rest settings moved to end of strength day
-   Mobility separate with countdown + tick
-   Interval timer ONLY shown on RUN days (removed from strength)
+/* 2 km 8:10 – Treadmill Routine (v8)
+   - Strength logging: kg + LWkg (read-only) + reps + LWreps (read-only)
+   - Per-set rest countdown box starts when set ticked
+   - Full week (7 days) + day selector
+   - Rest settings shown on strength days only (at the end)
+   - Mobility separate with countdown + tick
+   - Interval timer ONLY on Tue (Intervals). No interval timer on other run days.
+   - Adds Long Run day
 */
 
-const STORAGE_KEY = "treadmill810_v7";
+const STORAGE_KEY = "treadmill810_v8";
 const TODAY_KEY = () => new Date().toISOString().slice(0, 10);
 
 // -------------------- Plan (FULL WEEK) --------------------
@@ -42,6 +43,7 @@ const days = [
     main: {
       type: "run",
       title: "Intervals",
+      showIntervalTimer: true, // ONLY day that shows interval timer
       details: [
         "Rounds: 6",
         "Work: 95s @ 15.0 km/h (4:00/km)",
@@ -91,6 +93,7 @@ const days = [
     main: {
       type: "run",
       title: "Easy Run",
+      showIntervalTimer: false,
       details: [
         "20–30 min easy",
         "Speed: 10.0–12.0 km/h (6:00–5:00/km)",
@@ -106,6 +109,7 @@ const days = [
     main: {
       type: "run",
       title: "Tempo / Steady",
+      showIntervalTimer: false,
       details: [
         "10 min easy @ 11.0–12.0 km/h",
         "10–15 min steady @ 13.0–14.0 km/h",
@@ -117,9 +121,19 @@ const days = [
   },
   {
     key: "sun",
-    name: "Sun – Rest / Walk",
-    warmup: [],
-    main: { type: "rest", details: ["Optional 20–40 min walk", "Keep it easy."] },
+    name: "Sun – Long Run",
+    warmup: ["Incline 1.0%", "5 min easy jog"],
+    main: {
+      type: "run",
+      title: "Long Run",
+      showIntervalTimer: false,
+      details: [
+        "40–60 min easy (build up weekly)",
+        "Speed: 10.0–11.5 km/h (6:00–5:15/km)",
+        "Keep it comfortable, no grind",
+        "Incline: 1.0%"
+      ]
+    },
     mobility: [{ id: "fullbody", name: "Full body stretch", seconds: 180, note: "easy" }]
   }
 ];
@@ -128,18 +142,9 @@ const days = [
 const defaultState = {
   dayKey: "mon",
   restSeconds: 90,
-  session: {
-    running: false,
-    startedAt: null,
-    elapsedMs: 0,
-    lastSaved: null
-  },
-  logs: {
-    // logs[week][dayKey][exerciseId][setIndex] = { kg, reps, done, restEndsAtMs }
-  },
-  mobility: {
-    // mobility[dayKey][mobId] = { done, running, endsAtMs }
-  }
+  session: { running: false, startedAt: null, elapsedMs: 0, lastSaved: null },
+  logs: {},
+  mobility: {}
 };
 
 let state = loadState();
@@ -209,15 +214,10 @@ const warmupList = document.getElementById("warmupList");
 const mainBlock = document.getElementById("mainBlock");
 const mobilityList = document.getElementById("mobilityList");
 
-const restSecondsInput = document.getElementById("restSeconds");
-
-// -------------------- Init UI --------------------
+// -------------------- Init --------------------
 function init() {
   daySelect.innerHTML = days.map(d => `<option value="${d.key}">${d.name}</option>`).join("");
   daySelect.value = state.dayKey;
-
-  if (restSecondsInput) restSecondsInput.value = state.restSeconds;
-
   render();
   startTick();
 }
@@ -277,14 +277,8 @@ function setDoneAndStartRest(dayKey, exId, setIdx, done) {
   const wk = getWeekKey();
   const ex = getLogRef(wk, dayKey, exId);
   const row = ensurePath(ex, [String(setIdx)], { kg: "", reps: "", done: false, restEndsAtMs: null });
-
   row.done = done;
-
-  if (done) {
-    row.restEndsAtMs = Date.now() + (Number(state.restSeconds) * 1000);
-  } else {
-    row.restEndsAtMs = null;
-  }
+  row.restEndsAtMs = done ? (Date.now() + (Number(state.restSeconds) * 1000)) : null;
   saveState();
 }
 
@@ -303,10 +297,7 @@ function mobStart(dayKey, mobId, seconds) {
 function mobToggleDone(dayKey, mobId, done) {
   const m = getMob(dayKey, mobId);
   m.done = done;
-  if (done) {
-    m.running = false;
-    m.endsAtMs = null;
-  }
+  if (done) { m.running = false; m.endsAtMs = null; }
   saveState();
 }
 function mobRemainingMs(dayKey, mobId) {
@@ -333,16 +324,19 @@ function renderDay() {
   if (day.main.type === "strength") {
     mainBlock.innerHTML = `
       ${(day.main.exercises || []).map(ex => renderExercise(day.key, ex)).join("")}
-      ${renderRestSettings()} 
+      ${renderRestSettings()}
     `;
   } else if (day.main.type === "run") {
+    const showTimer = !!day.main.showIntervalTimer; // ONLY Tue true
     mainBlock.innerHTML = `
       <div class="cardTitle">${escapeHtml(day.main.title || "Run")}</div>
       <ul>${(day.main.details || []).map(x => `<li>${escapeHtml(x)}</li>`).join("")}</ul>
-      <div class="hr"></div>
-      <div class="cardTitle">Interval Timer</div>
-      <div class="muted">Use for work/rest intervals</div>
-      ${renderIntervalTimer()}
+      ${showTimer ? `
+        <div class="hr"></div>
+        <div class="cardTitle">Interval Timer</div>
+        <div class="muted">Use for work/rest intervals</div>
+        ${renderIntervalTimer()}
+      ` : ``}
     `;
   } else {
     mainBlock.innerHTML = `
@@ -351,10 +345,10 @@ function renderDay() {
     `;
   }
 
-  // Mobility card
   mobilityList.innerHTML =
     (day.mobility || []).map(m => renderMobItem(day.key, m)).join("") || `<div class="muted">—</div>`;
 }
+
 function renderExercise(dayKey, ex) {
   const wk = getWeekKey();
   const exLog = getLogRef(wk, dayKey, ex.id);
@@ -366,8 +360,7 @@ function renderExercise(dayKey, ex) {
     const lwKg = getLastWeekValue(dayKey, ex.id, setIdx, "kg");
     const lwReps = getLastWeekValue(dayKey, ex.id, setIdx, "reps");
 
-    let remaining = 0;
-    if (row.restEndsAtMs) remaining = Math.max(0, row.restEndsAtMs - Date.now());
+    const remaining = row.restEndsAtMs ? Math.max(0, row.restEndsAtMs - Date.now()) : 0;
     const restLabel = row.restEndsAtMs ? formatMS(remaining) : "—";
 
     return `
@@ -409,6 +402,7 @@ function renderExercise(dayKey, ex) {
     </div>
   `;
 }
+
 function renderRestSettings() {
   return `
     <div class="hr"></div>
@@ -424,6 +418,7 @@ function renderRestSettings() {
     </div>
   `;
 }
+
 function renderMobItem(dayKey, m) {
   const mob = getMob(dayKey, m.id);
   const rem = mobRemainingMs(dayKey, m.id);
@@ -435,17 +430,15 @@ function renderMobItem(dayKey, m) {
         <div class="mobName">${escapeHtml(m.name)}</div>
         <div class="tiny">${escapeHtml(m.note || "")}</div>
       </div>
-
       <div class="mobTimer">${shown}</div>
-
       <button class="mobBtn" data-mobstart="${m.id}" title="Start">▶</button>
-
       <div class="mobDone">
         <input class="mobChk" type="checkbox" ${mob.done ? "checked" : ""} data-mobdone="${m.id}" />
       </div>
     </div>
   `;
 }
+
 function renderIntervalTimer() {
   return `
     <div class="card" style="margin:12px 0 0;">
@@ -471,6 +464,7 @@ function renderIntervalTimer() {
     </div>
   `;
 }
+
 function render() {
   renderSession();
   renderDay();
@@ -504,6 +498,8 @@ function attachHandlers() {
   sessionPauseBtn.onclick = sessionPause;
   sessionEndBtn.onclick = sessionEndSave;
 
+  // Rest settings (only exists on strength days)
+  const restSecondsInput = document.getElementById("restSeconds");
   document.querySelectorAll("[data-rest]").forEach(btn => {
     btn.onclick = () => {
       state.restSeconds = Number(btn.getAttribute("data-rest")) || 90;
@@ -511,7 +507,6 @@ function attachHandlers() {
       saveState();
     };
   });
-
   if (restSecondsInput) {
     restSecondsInput.onchange = () => {
       const v = Number(restSecondsInput.value || 90);
@@ -565,6 +560,7 @@ function attachHandlers() {
     };
   });
 
+  // Interval timer only if present (only Tue renders it)
   const itTime = document.getElementById("itTime");
   if (itTime) setupIntervalTimer();
 }
@@ -621,7 +617,7 @@ function startTick() {
   }, 250);
 }
 
-// -------------------- Interval Timer (RUN days only) --------------------
+// -------------------- Interval Timer (ONLY Tue) --------------------
 function setupIntervalTimer() {
   const itTime = document.getElementById("itTime");
   const itStart = document.getElementById("itStart");
