@@ -739,3 +739,65 @@ function escapeHtml(s) {
   })[m]);
 }
 function escapeAttr(s) { return escapeHtml(s).replace(/"/g, "&quot;"); }
+
+// ==================== PROGRESSION LOGIC ====================
+
+// ---- Strength progression ----
+function getStrengthSuggestion(dayKey, ex) {
+  const wk = Number(getWeekKey());
+  const lastWeek = String(Math.max(1, wk - 1));
+  const logs = (((state.logs || {})[lastWeek] || {})[dayKey] || {})[ex.id];
+
+  if (!logs) return null;
+
+  let allHit = true;
+  let avgKg = 0;
+  let sets = 0;
+
+  for (let i = 1; i <= ex.sets; i++) {
+    const row = logs[String(i)];
+    if (!row) return null;
+
+    const reps = Number(row.reps || 0);
+    const kg = Number(row.kg || 0);
+
+    if (reps < ex.targetReps) allHit = false;
+    avgKg += kg;
+    sets++;
+  }
+
+  if (!allHit || sets === 0) return null;
+
+  avgKg = avgKg / sets;
+
+  // Weight jump rules
+  let jump = 2.5;
+  if (/split|lunge|step/i.test(ex.name)) jump = 1;
+  if (/calf/i.test(ex.name)) jump = 2.5;
+
+  return Math.round((avgKg + jump) * 2) / 2;
+}
+
+// ---- Interval progression ----
+function getIntervalSuggestion() {
+  const wk = Number(getWeekKey());
+
+  if (wk % 4 === 0) {
+    return { reps: 6, speedBump: 0.2 };
+  }
+
+  return { reps: Math.min(8, 6 + (wk % 4)), speedBump: 0 };
+}
+
+// ---- Tempo progression ----
+function getTempoMinutes(base = 12) {
+  const wk = Number(getWeekKey());
+  return Math.min(20, base + Math.floor(wk / 2) * 2);
+}
+
+// ---- Long run progression ----
+function getLongRunMinutes(base = 45) {
+  const wk = Number(getWeekKey());
+  if (wk % 4 === 0) return base; // deload
+  return base + Math.min(25, wk * 5);
+}
