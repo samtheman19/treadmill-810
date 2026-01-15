@@ -1,5 +1,6 @@
-/* Service Worker – forces Home Screen updates cleanly */
-const CACHE = "treadmill810-cache-v8";
+/* Service Worker – FORCE refresh + clean updates for Home Screen PWA */
+
+const CACHE_NAME = "treadmill810-cache-v9";
 
 const ASSETS = [
   "./",
@@ -7,33 +8,33 @@ const ASSETS = [
   "./app.js",
   "./manifest.json",
   "./sw.js"
-  // add icon paths here if used in manifest:
-  // "./icon-192.png",
-  // "./icon-512.png"
 ];
 
+// Install: cache fresh files immediately
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches
-      .open(CACHE)
+    caches.open(CACHE_NAME)
       .then((cache) => cache.addAll(ASSETS))
       .then(() => self.skipWaiting())
   );
 });
 
+// Activate: delete ALL old caches
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches
-      .keys()
-      .then((keys) =>
-        Promise.all(
-          keys.map((key) => (key !== CACHE ? caches.delete(key) : null))
-        )
+    caches.keys().then((keys) =>
+      Promise.all(
+        keys.map((key) => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
+        })
       )
-      .then(() => self.clients.claim())
+    ).then(() => self.clients.claim())
   );
 });
 
+// Fetch: cache-first, network fallback
 self.addEventListener("fetch", (event) => {
   const req = event.request;
 
@@ -45,7 +46,9 @@ self.addEventListener("fetch", (event) => {
         .then((res) => {
           if (req.method === "GET" && res.ok) {
             const copy = res.clone();
-            caches.open(CACHE).then((cache) => cache.put(req, copy));
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(req, copy);
+            });
           }
           return res;
         })
